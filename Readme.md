@@ -127,7 +127,7 @@ I tested on meson 1.4.1.
 
 # Requirement
 
-TPhrase supports C++11 or later, and it's tested on C++11 and C++20.
+TPhrase supports C++11 or later, and it's tested on C++11 and C++20. The source files uses only C++11, the public include files (under include/) uses concept if available.
 
 # License
 This file is part of TPhrase.
