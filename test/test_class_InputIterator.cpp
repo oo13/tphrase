@@ -106,7 +106,7 @@ std::size_t test_class_InputIterator()
         return true;
     });
 
-    ut.set_test("Cunsom Input Iterator L-Value", [&]() {
+    ut.set_test("Custom Input Iterator L-Value", [&]() {
         bool good = true;
         {
             TestInputIterator b;
@@ -123,7 +123,7 @@ std::size_t test_class_InputIterator()
         return good && destructor_count == 1;
     });
 
-    ut.set_test("Cunsom Input Iterator R-Value", [&]() {
+    ut.set_test("Custom Input Iterator R-Value", [&]() {
         bool good = true;
         {
             tphrase::InputIterator<TestInputIterator, char> it{TestInputIterator{}, static_cast<char>(2)};
