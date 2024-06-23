@@ -380,5 +380,18 @@ Hello World.)");
         return r == "nil" && err_msg.find("The end of the text or \"\\n\" is expected.") != err_msg.npos;
     });
 
+    ut.set_test("Recursive Expansion Error", [&]() {
+        tphrase::Generator ph;
+        ph.add(R"(
+            main = {A}
+            A = {B}
+            B = {C}
+            C = {B}
+        )");
+        const auto r = ph.generate();
+        const std::string err_msg{ph.get_error_message()};
+        return r == "nil" && err_msg.find("Recursive expansion of \"B\" is detected.") != err_msg.npos;
+    });
+
     return ut.run();
 }
