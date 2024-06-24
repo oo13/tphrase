@@ -21,6 +21,7 @@
     \endparblock
 */
 
+#include <cassert>
 #include <stdexcept>
 #include <utility>
 
@@ -48,6 +49,14 @@ namespace tphrase {
     DataText::Part_t::Part_t(DataProductionRule *v)
         : kind{Kind_t::ANONYMOUS_RULE}, s{}, r{v}
     {
+    }
+
+    DataText::Part_t &DataText::Part_t::operator=(Part_t &&a)
+    {
+        assert(kind == Kind_t::EXPANSION && r == nullptr);
+        kind = a.kind;
+        r = a.r;
+        return *this;
     }
 
     DataText::DataText()
@@ -183,6 +192,24 @@ namespace tphrase {
         }
         if (!weight_by_user) {
             weight = tmp_weight;
+        }
+    }
+
+    void
+    DataText::fix_local_nonterminal(DataSyntax &syntax,
+                                    std::string &err_msg)
+    {
+        for (auto &p : parts) {
+            if (p.kind == Part_t::Kind_t::EXPANSION
+                && syntax.is_local_nonterminal(p.s)) {
+                if (syntax.has_nonterminal(p.s)) {
+                    p = Part_t(new DataProductionRule{syntax.get_production_rule(p.s)});
+                } else {
+                    err_msg += "The local nonterminal \"";
+                    err_msg += p.s;
+                    err_msg += "\" is not found.\n";
+                }
+            }
         }
     }
 }

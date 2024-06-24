@@ -328,7 +328,7 @@ std::size_t test_generate()
         main2.add(common);
         tphrase::Generator ph1(main1);
         tphrase::Generator ph2(main2);
-        return ph1.generate() == "1" and ph2.generate() == "2"
+        return ph1.generate() == "1" && ph2.generate() == "2"
             && common.get_error_message().empty()
             && main1.get_error_message().empty()
             && main2.get_error_message().empty()
@@ -369,6 +369,38 @@ std::size_t test_generate()
             && main2.get_error_message().empty()
             && ph1.get_error_message().empty()
             && ph2.get_error_message().empty();
+    });
+
+    ut.set_test("Overwrite Nonterminal", [&]() {
+        tphrase::Syntax sub(R"(
+            sub = A
+        )");
+        tphrase::Syntax main(R"(
+            main = {sub}
+            sub = B
+        )");
+        main.add(sub);
+        tphrase::Generator ph(main);
+        return ph.generate() == "A"
+            && sub.get_error_message().empty()
+            && main.get_error_message().empty()
+            && ph.get_error_message().empty();
+    });
+
+    ut.set_test("Don't Overwrite Local Nonterminal", [&]() {
+        tphrase::Syntax sub(R"(
+            _sub = A
+        )");
+        tphrase::Syntax main(R"(
+            main = {_sub}
+            _sub = B
+        )");
+        main.add(sub);
+        tphrase::Generator ph(main);
+        return ph.generate() == "B"
+            && sub.get_error_message().empty()
+            && main.get_error_message().empty()
+            && ph.get_error_message().empty();
     });
 
     return ut.run();

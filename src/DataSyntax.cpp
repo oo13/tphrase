@@ -127,6 +127,11 @@ namespace tphrase {
         return assignments.find(nonterminal) != assignments.end();
     }
 
+    bool DataSyntax::is_local_nonterminal(const std::string &nonterminal) const
+    {
+        return nonterminal[0] == '_';
+    }
+
     DataProductionRule &
     DataSyntax::get_production_rule(const std::string &nonterminal)
     {
@@ -163,6 +168,20 @@ namespace tphrase {
             std::unordered_set<std::string> used_nonterminals{ nonterminal_main };
             main_rule->bind_syntax(*this, used_nonterminals, err_msg);
             is_bound = err_msg.size() == prev_len;
+        }
+    }
+
+    void DataSyntax::fix_local_nonterminal(std::string &err_msg)
+    {
+        for (auto &it : assignments) {
+            it.second.fix_local_nonterminal(*this, err_msg);
+        }
+        for (auto it = assignments.begin(); it != assignments.end(); ) {
+            if (is_local_nonterminal(it->first)) {
+                it = assignments.erase(it);
+            } else {
+                ++it;
+            }
         }
     }
 

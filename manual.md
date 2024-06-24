@@ -202,6 +202,8 @@ A22 = 5 | 6 | 7 | 8 | 9
 ```
 The chance to select {A21} is 35%, {A22} is 35%. {A1} and {A2} aren't affected by ":=". (cf. The weight propagates the higher layers.)
 
+The nonterminal starts with "_" is  a local nonterminal that is visible only from the same compile unit.
+
 ## Production rule
 
 The production rule consist of options and gsubs. For example: `text1 | text2 | text3 ~ /pat1/repl1/ ~ /pat2/repl2/g`
@@ -241,7 +243,8 @@ The string enclosed by "{" and "}" is the expansion, which will be expanded into
 1. "{(}" and "{)}" will be expanded into "{" and "}".
 1. If the beginning of the expansion is "{*", the expansion will be expanded into the empty string. (Technically speaking, it's not a comment block.)
 1. If the beginning of the expansion is "{=" or "{:=", the content (except the first "=" or ":=") is considered as a production rule. For example, "{= A|B|C}" will be expanded into the result of the production rule "A|B|C". The syntax of the content is expressed by EBNF: `content = space_nl_opt, production_rule, space_nl_opt ;` "{:=" is, of course, the equalized select version of "{=".
-1. The unsolved expansion will be expanded into itself removed outer "{" and "}". (I recommend that the nonterminal is noticeable to find it easily unless you will leave it unsolved.)
+1. The global unsolved expansion will be expanded into itself removed outer "{" and "}". (I recommend that the nonterminal is noticeable to find it easily unless you will leave it unsolved.)
+1. The local unsolved expansion occurs an error.
 
 ## Gsub (Global substitution)
 Gsub is the function to substitute the resulting string selected from the options. You can specify any number (including zero) of gsubs that substitute the string. 1st gsub specifies the substitution of the selected text out of the options, and then the result of the preceding substitution is substituted by the next gsub's.

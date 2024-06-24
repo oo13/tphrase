@@ -116,6 +116,13 @@ namespace tphrase {
                          std::unordered_set<std::string> &used_nonterminals,
                          std::string &err_msg);
 
+        /** Fix the reference to the local nonterminal.
+            \param [inout] syntax The syntax to be fixed.
+            \param [inout] err_msg The error messages are added if some errors are detected.
+            \note An error is caused if the local nonterminal that is referred by a production rule doesn't exists.
+        */
+        void fix_local_nonterminal(DataSyntax& syntax, std::string &err_msg);
+
     private:
         /** Copy another DataText to parts.
             \param [in] a The source.
@@ -165,8 +172,9 @@ namespace tphrase {
             /** The move assignment.
                 \param [inout] a The source. (moved)
                 \return *this
+                \note This kind must be EXPANSION.
             */
-            Part_t &operator=(Part_t &&a) = default;
+            Part_t &operator=(Part_t &&a);
         };
 
         std::vector<Part_t> parts; /**< The parts of the text. */

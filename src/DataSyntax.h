@@ -82,6 +82,11 @@ namespace tphrase {
             \return The instance has the nonterminal.
         */
         bool has_nonterminal(const std::string &nonterminal) const;
+        /** Is is a local instance?
+            \param [in] nonterminal The target nonterminal.
+            \return It's a local nonterminal.
+        */
+        bool is_local_nonterminal(const std::string &nonterminal) const;
         /** Get the production rule assigned to the nonterminal.
             \param [in] nonterminal The target nonterminal.
             \return The production rule.
@@ -116,6 +121,12 @@ namespace tphrase {
             \note An error is caused if the recursive reference to a nonterminal exists.
         */
         void bind_syntax(std::string &err_msg);
+
+        /** Fix the reference to the local nonterminal.
+            \param [inout] err_msg The error messages are added if some errors are detected.
+            \note An error is caused if the local nonterminal that is referred by a production rule doesn't exists.
+        */
+        void fix_local_nonterminal(std::string &err_msg);
 
         /** Clear the instance. */
         void clear();

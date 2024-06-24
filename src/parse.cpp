@@ -92,6 +92,7 @@ namespace tphrase {
             }
             skip_space_nl(it);
         }
+        syntax.fix_local_nonterminal(err_msg);
         return syntax;
     }
 }

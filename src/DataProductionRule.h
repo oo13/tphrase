@@ -100,6 +100,14 @@ namespace tphrase {
                          std::unordered_set<std::string> &used_nonterminals,
                          std::string &err_msg);
 
+        /** Fix the reference to the local nonterminal.
+            \param [inout] syntax The syntax to be fixed.
+            \param [inout] err_msg The error messages are added if some errors are detected.
+            \note An error is caused if the local nonterminal that is referred by a production rule doesn't exists.
+        */
+        void fix_local_nonterminal(DataSyntax &syntax,
+                                   std::string &err_msg);
+
     private:
         DataOptions options; /**< The options in the production rule. */
         DataGsubs gsubs; /**< The gsubs in the production rule. */
@@ -130,6 +138,14 @@ namespace tphrase {
                                     std::string &err_msg)
     {
         return options.bind_syntax(syntax, used_nonterminals, err_msg);
+    }
+
+    inline
+    void
+    DataProductionRule::fix_local_nonterminal(DataSyntax &syntax,
+                                              std::string &err_msg)
+    {
+        return options.fix_local_nonterminal(syntax, err_msg);
     }
 }
 

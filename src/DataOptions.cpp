@@ -80,4 +80,13 @@ namespace tphrase {
             ++it;
         }
     }
+
+    void
+    DataOptions::fix_local_nonterminal(DataSyntax &syntax,
+                                       std::string &err_msg)
+    {
+        for (auto &t : texts) {
+            t.fix_local_nonterminal(syntax, err_msg);
+        }
+    }
 }

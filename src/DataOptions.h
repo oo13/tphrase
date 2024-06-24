@@ -100,6 +100,13 @@ namespace tphrase {
                          std::unordered_set<std::string> &used_nonterminals,
                          std::string &err_msg);
 
+        /** Fix the reference to the local nonterminal.
+            \param [inout] syntax The syntax to be fixed.
+            \param [inout] err_msg The error messages are added if some errors are detected.
+            \note An error is caused if the local nonterminal that is referred by a production rule doesn't exists.
+        */
+        void fix_local_nonterminal(DataSyntax& syntax, std::string &err_msg);
+
     private:
         std::vector<DataText> texts; /**< The set of the text options. */
         std::vector<double> weights; /**< weights[i] is the sum of weights[i-1] and the weight to select texts[i]. */
