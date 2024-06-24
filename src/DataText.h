@@ -106,7 +106,7 @@ namespace tphrase {
         void set_weight(double w);
 
         /** Bind the instance on a syntax.
-            \param [in] syntax The syntax to be bound on.
+            \param [inout] syntax The syntax to be bound on.
             \param [inout] used_nonterminals The set of the nonterminals that have already used for an expansion.
             \param [inout] err_msg The error messages are added if some errors are detected.
             \note used_nonterminals is non-const but the items in the set won't be changed. Some items will be added, and then removed.
