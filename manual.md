@@ -37,7 +37,7 @@ Hi, guys!
 12
 ```
 
-## Text Substitution, and Generation with a Parameter
+## Text Substitution, and Generation with an External Context
 
 C++ code:
 ```C
@@ -74,7 +74,7 @@ Hi, brothers!
 
 "{GENDER}-siblings" is followed by 2 so the weight of "{GENDER}-siblings" is 2. The quotation is necessary if it's followed by a weight.
 
-If you will make it translatable, the parameters should be the range in the predefined variations and use in order to restrict the context, instead of to introduce extensibility, that is, you should tell the translator the possible combinations before translating.
+If you will make it translatable, the external contexts should be the range in the predefined variations and use in order to restrict the context, instead of to introduce extensibility, that is, you should tell the translator the possible combinations before translating.
 
 ## Multiple Phrase Syntaxes
 
@@ -239,7 +239,8 @@ The text may have expansions, which is a string enclosed by "{" and "}". The tex
 ## Expansion
 The string enclosed by "{" and "}" is the expansion, which will be expanded into a text. "{" and "}" can enclose any character except "}".
 
-1. If the string enclosed "{" and "}" has only alphabet, numeric, and low line characters ("[A-Za-z0-9_]"), it's a nonterminal. If the nonterminal is assigned to a production rule or a parameter, the expansion will be expanded into the generated text.
+1. If the string enclosed "{" and "}" has only alphabet, numeric, and low line characters ("[A-Za-z0-9_]"), it's a nonterminal. If the nonterminal is assigned to a production rule, the expansion will be expanded in the generated text.
+1. If the external context specifies the substitution for the global nonterminal, it's applied.
 1. "{(}" and "{)}" will be expanded into "{" and "}".
 1. If the beginning of the expansion is "{*", the expansion will be expanded into the empty string. (Technically speaking, it's not a comment block.)
 1. If the beginning of the expansion is "{=" or "{:=", the content (except the first "=" or ":=") is considered as a production rule. For example, "{= A|B|C}" will be expanded into the result of the production rule "A|B|C". The syntax of the content is expressed by EBNF: `content = space_nl_opt, production_rule, space_nl_opt ;` "{:=" is, of course, the equalized select version of "{=".
