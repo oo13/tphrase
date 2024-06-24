@@ -63,12 +63,9 @@ std::size_t test_class_Generator()
         )"};
         tphrase::Generator ph{syntax};
         auto r = ph.generate();
-        return r == "A"
+        return r == "nil"
             && syntax.get_error_message().find("A text is expected.") != std::string::npos
-            && ph.get_error_message().empty()
-            && ph.get_number_of_syntax() == 1
-            && ph.get_weight() == 7
-            && ph.get_combination_number() == 7;
+            && ph.get_error_message().find("The nonterminal \"main\" doesn't exist.\n") != std::string::npos;
     });
 
     ut.set_test("Constructor with Syntax (move)", [&]() {
@@ -81,11 +78,9 @@ std::size_t test_class_Generator()
         )"};
         tphrase::Generator ph{std::move(syntax)};
         auto r = ph.generate();
-        return r == "A"
+        return r == "nil"
             && ph.get_error_message().find("A text is expected.") != std::string::npos
-            && ph.get_number_of_syntax() == 1
-            && ph.get_weight() == 7
-            && ph.get_combination_number() == 7;
+            && ph.get_error_message().find("The nonterminal \"main\" doesn't exist.\n") != std::string::npos;
     });
 
     ut.set_test("Constructor via R-Value Syntax (a pair of input iterators)", [&]() {
@@ -100,11 +95,9 @@ std::size_t test_class_Generator()
         tphrase::Generator ph{{std::istream_iterator<char>{s},
                                std::istream_iterator<char>{}}};
         auto r = ph.generate();
-        return r == "X"
+        return r == "nil"
             && ph.get_error_message().find("The non-empty pattern is expected.") != std::string::npos
-            && ph.get_number_of_syntax() == 1
-            && ph.get_weight() == 7
-            && ph.get_combination_number() == 7;
+            && ph.get_error_message().find("The nonterminal \"main\" doesn't exist.\n") != std::string::npos;
     });
 
     ut.set_test("Constructor via R-Value Syntax (a std::string)", [&]() {
@@ -117,11 +110,9 @@ std::size_t test_class_Generator()
         )"};
         tphrase::Generator ph{s};
         auto r = ph.generate();
-        return r == "X"
+        return r == "nil"
             && ph.get_error_message().find("The non-empty pattern is expected.") != std::string::npos
-            && ph.get_number_of_syntax() == 1
-            && ph.get_weight() == 7
-            && ph.get_combination_number() == 7;
+            && ph.get_error_message().find("The nonterminal \"main\" doesn't exist.\n") != std::string::npos;
     });
 
     ut.set_test("Constructor via R-Value Syntax (a const char*)", [&]() {
@@ -133,14 +124,72 @@ std::size_t test_class_Generator()
             B = B1 | B2 | B3
         )"};
         auto r = ph.generate();
-        return r == "X"
+        return r == "nil"
             && ph.get_error_message().find("The non-empty pattern is expected.") != std::string::npos
-            && ph.get_number_of_syntax() == 1
-            && ph.get_weight() == 7
-            && ph.get_combination_number() == 7;
+            && ph.get_error_message().find("The nonterminal \"main\" doesn't exist.\n") != std::string::npos;
     });
 
-    ut.set_test("Copy Constructor", [&]() {
+    ut.set_test("Copy Constructor#1", [&]() {
+        tphrase::Generator ph1{R"(
+            main = {= X | Y | Z } | {A} | {B}
+
+            A = A1 | A2 | A3
+
+            B = B1 | B2 | B3
+        )"};
+        ph1.add(R"(
+            main = {= V | W } | {C}
+
+            C = C1 | C2 | C3
+        )");
+        tphrase::Generator ph2{ph1};
+        ph1.equalize_chance();
+        tphrase::Generator::set_random_function(get_default_random_func());
+        const bool good1 = check_distribution(ph1, 100000, {
+                { "X", 1.0 / (2.0 * 9.0) },
+                { "Y", 1.0 / (2.0 * 9.0) },
+                { "Z", 1.0 / (2.0 * 9.0) },
+                { "A1", 1.0 / (2.0 * 9.0) },
+                { "A2", 1.0 / (2.0 * 9.0) },
+                { "A3", 1.0 / (2.0 * 9.0) },
+                { "B1", 1.0 / (2.0 * 9.0) },
+                { "B2", 1.0 / (2.0 * 9.0) },
+                { "B3", 1.0 / (2.0 * 9.0) },
+                { "V", 1.0 / (2.0 * 5.0) },
+                { "W", 1.0 / (2.0 * 5.0) },
+                { "C1", 1.0 / (2.0 * 5.0) },
+                { "C2", 1.0 / (2.0 * 5.0) },
+                { "C3", 1.0 / (2.0 * 5.0) },
+            }, 0.01);
+        const bool good2 = check_distribution(ph2, 100000, {
+                { "X", 1.0 / 14.0 },
+                { "Y", 1.0 / 14.0 },
+                { "Z", 1.0 / 14.0 },
+                { "A1", 1.0 / 14.0 },
+                { "A2", 1.0 / 14.0 },
+                { "A3", 1.0 / 14.0 },
+                { "B1", 1.0 / 14.0 },
+                { "B2", 1.0 / 14.0 },
+                { "B3", 1.0 / 14.0 },
+                { "V", 1.0 / 14.0 },
+                { "W", 1.0 / 14.0 },
+                { "C1", 1.0 / 14.0 },
+                { "C2", 1.0 / 14.0 },
+                { "C3", 1.0 / 14.0 },
+            }, 0.01);
+
+        return good1 && good2
+            && ph1.get_error_message().empty()
+            && ph2.get_error_message().empty()
+            && ph1.get_number_of_syntax() == 2
+            && ph2.get_number_of_syntax() == 2
+            && ph1.get_weight() == 14
+            && ph2.get_weight() == 14
+            && ph1.get_combination_number() == 14
+            && ph2.get_combination_number() == 14;
+    });
+
+    ut.set_test("Copy Constructor#2", [&]() {
         tphrase::Generator ph1{R"(
             main = {= X | Y | Z } | {A} | {B}
 
@@ -154,47 +203,54 @@ std::size_t test_class_Generator()
             C = C1 | C2 | C3 |
         )");
         tphrase::Generator ph2{ph1};
-        ph1.equalize_chance();
-        tphrase::Generator::set_random_function(get_default_random_func());
-        const bool good1 = check_distribution(ph1, 100000, {
-                { "X", 1.0 / (2.0 * 7.0) },
-                { "Y", 1.0 / (2.0 * 7.0) },
-                { "Z", 1.0 / (2.0 * 7.0) },
-                { "A", 1.0 / (2.0 * 7.0) },
-                { "B1", 1.0 / (2.0 * 7.0) },
-                { "B2", 1.0 / (2.0 * 7.0) },
-                { "B3", 1.0 / (2.0 * 7.0) },
-                { "V", 1.0 / (2.0 * 3.0) },
-                { "W", 1.0 / (2.0 * 3.0) },
-                { "C", 1.0 / (2.0 * 3.0) },
-            }, 0.01);
-        const bool good2 = check_distribution(ph2, 100000, {
-                { "X", 1.0 / 10.0 },
-                { "Y", 1.0 / 10.0 },
-                { "Z", 1.0 / 10.0 },
-                { "A", 1.0 / 10.0 },
-                { "B1", 1.0 / 10.0 },
-                { "B2", 1.0 / 10.0 },
-                { "B3", 1.0 / 10.0 },
-                { "V", 1.0 / 10.0 },
-                { "W", 1.0 / 10.0 },
-                { "C", 1.0 / 10.0 },
-            }, 0.01);
-
-        return good1 && good2
-            && ph1.get_error_message().find("The non-empty pattern is expected.") != std::string::npos
+        return ph1.get_error_message().find("The non-empty pattern is expected.") != std::string::npos
             && ph1.get_error_message().find("A text is expected.") != std::string::npos
+            && ph1.get_error_message().find("The nonterminal \"main\" doesn't exist.\n") != std::string::npos
             && ph2.get_error_message().find("The non-empty pattern is expected.") != std::string::npos
             && ph2.get_error_message().find("A text is expected.") != std::string::npos
-            && ph1.get_number_of_syntax() == 2
-            && ph2.get_number_of_syntax() == 2
-            && ph1.get_weight() == 10
-            && ph2.get_weight() == 10
-            && ph1.get_combination_number() == 10
-            && ph2.get_combination_number() == 10;
+            && ph2.get_error_message().find("The nonterminal \"main\" doesn't exist.\n") != std::string::npos;
     });
 
-    ut.set_test("Move Constructor", [&]() {
+    ut.set_test("Move Constructor#1", [&]() {
+        tphrase::Generator ph1{R"(
+            main = {= X | Y | Z } | {A} | {B}
+
+            A = A1 | A2 | A3
+
+            B = B1 | B2 | B3
+        )"};
+        ph1.add(R"(
+            main = {= V | W } | {C}
+
+            C = C1 | C2 | C3
+        )");
+        tphrase::Generator ph2{std::move(ph1)};
+        tphrase::Generator::set_random_function(get_default_random_func());
+        const bool good2 = check_distribution(ph2, 100000, {
+                { "X", 1.0 / 14.0 },
+                { "Y", 1.0 / 14.0 },
+                { "Z", 1.0 / 14.0 },
+                { "A1", 1.0 / 14.0 },
+                { "A2", 1.0 / 14.0 },
+                { "A3", 1.0 / 14.0 },
+                { "B1", 1.0 / 14.0 },
+                { "B2", 1.0 / 14.0 },
+                { "B3", 1.0 / 14.0 },
+                { "V", 1.0 / 14.0 },
+                { "W", 1.0 / 14.0 },
+                { "C1", 1.0 / 14.0 },
+                { "C2", 1.0 / 14.0 },
+                { "C3", 1.0 / 14.0 },
+            }, 0.01);
+
+        return good2
+            && ph2.get_error_message().empty()
+            && ph2.get_number_of_syntax() == 2
+            && ph2.get_weight() == 14
+            && ph2.get_combination_number() == 14;
+    });
+
+    ut.set_test("Move Constructor#2", [&]() {
         tphrase::Generator ph1{R"(
             main = {= X | Y | Z } | {A} | {B}
 
@@ -208,29 +264,73 @@ std::size_t test_class_Generator()
             C = C1 | C2 | C3 |
         )");
         tphrase::Generator ph2{std::move(ph1)};
-        tphrase::Generator::set_random_function(get_default_random_func());
-        const bool good2 = check_distribution(ph2, 100000, {
-                { "X", 1.0 / 10.0 },
-                { "Y", 1.0 / 10.0 },
-                { "Z", 1.0 / 10.0 },
-                { "A", 1.0 / 10.0 },
-                { "B1", 1.0 / 10.0 },
-                { "B2", 1.0 / 10.0 },
-                { "B3", 1.0 / 10.0 },
-                { "V", 1.0 / 10.0 },
-                { "W", 1.0 / 10.0 },
-                { "C", 1.0 / 10.0 },
-            }, 0.01);
-
-        return good2
-            && ph2.get_error_message().find("The non-empty pattern is expected.") != std::string::npos
+        return ph2.get_error_message().find("The non-empty pattern is expected.") != std::string::npos
             && ph2.get_error_message().find("A text is expected.") != std::string::npos
-            && ph2.get_number_of_syntax() == 2
-            && ph2.get_weight() == 10
-            && ph2.get_combination_number() == 10;
+            && ph2.get_error_message().find("The nonterminal \"main\" doesn't exist.\n") != std::string::npos;
     });
 
-    ut.set_test("Copy Assignment", [&]() {
+    ut.set_test("Copy Assignment#1", [&]() {
+        tphrase::Generator ph1{R"(
+            main = {= X | Y | Z } | {A} | {B}
+
+            A = A1 | A2 | A3
+
+            B = B1 | B2 | B3
+        )"};
+        ph1.add(R"(
+            main = {= V | W } | {C}
+
+            C = C1 | C2 | C3
+        )");
+        tphrase::Generator ph2;
+        ph2 = ph1;
+        ph1.equalize_chance();
+        tphrase::Generator::set_random_function(get_default_random_func());
+        const bool good1 = check_distribution(ph1, 100000, {
+                { "X", 1.0 / (2.0 * 9.0) },
+                { "Y", 1.0 / (2.0 * 9.0) },
+                { "Z", 1.0 / (2.0 * 9.0) },
+                { "A1", 1.0 / (2.0 * 9.0) },
+                { "A2", 1.0 / (2.0 * 9.0) },
+                { "A3", 1.0 / (2.0 * 9.0) },
+                { "B1", 1.0 / (2.0 * 9.0) },
+                { "B2", 1.0 / (2.0 * 9.0) },
+                { "B3", 1.0 / (2.0 * 9.0) },
+                { "V", 1.0 / (2.0 * 5.0) },
+                { "W", 1.0 / (2.0 * 5.0) },
+                { "C1", 1.0 / (2.0 * 5.0) },
+                { "C2", 1.0 / (2.0 * 5.0) },
+                { "C3", 1.0 / (2.0 * 5.0) },
+            }, 0.01);
+        const bool good2 = check_distribution(ph2, 100000, {
+                { "X", 1.0 / 14.0 },
+                { "Y", 1.0 / 14.0 },
+                { "Z", 1.0 / 14.0 },
+                { "A1", 1.0 / 14.0 },
+                { "A2", 1.0 / 14.0 },
+                { "A3", 1.0 / 14.0 },
+                { "B1", 1.0 / 14.0 },
+                { "B2", 1.0 / 14.0 },
+                { "B3", 1.0 / 14.0 },
+                { "V", 1.0 / 14.0 },
+                { "W", 1.0 / 14.0 },
+                { "C1", 1.0 / 14.0 },
+                { "C2", 1.0 / 14.0 },
+                { "C3", 1.0 / 14.0 },
+            }, 0.01);
+
+        return good1 && good2
+            && ph1.get_error_message().empty()
+            && ph2.get_error_message().empty()
+            && ph1.get_number_of_syntax() == 2
+            && ph2.get_number_of_syntax() == 2
+            && ph1.get_weight() == 14
+            && ph2.get_weight() == 14
+            && ph1.get_combination_number() == 14
+            && ph2.get_combination_number() == 14;
+    });
+
+    ut.set_test("Copy Assignment#2", [&]() {
         tphrase::Generator ph1{R"(
             main = {= X | Y | Z } | {A} | {B}
 
@@ -245,47 +345,55 @@ std::size_t test_class_Generator()
         )");
         tphrase::Generator ph2;
         ph2 = ph1;
-        ph1.equalize_chance();
-        tphrase::Generator::set_random_function(get_default_random_func());
-        const bool good1 = check_distribution(ph1, 100000, {
-                { "X", 1.0 / (2.0 * 7.0) },
-                { "Y", 1.0 / (2.0 * 7.0) },
-                { "Z", 1.0 / (2.0 * 7.0) },
-                { "A", 1.0 / (2.0 * 7.0) },
-                { "B1", 1.0 / (2.0 * 7.0) },
-                { "B2", 1.0 / (2.0 * 7.0) },
-                { "B3", 1.0 / (2.0 * 7.0) },
-                { "V", 1.0 / (2.0 * 3.0) },
-                { "W", 1.0 / (2.0 * 3.0) },
-                { "C", 1.0 / (2.0 * 3.0) },
-            }, 0.01);
-        const bool good2 = check_distribution(ph2, 100000, {
-                { "X", 1.0 / 10.0 },
-                { "Y", 1.0 / 10.0 },
-                { "Z", 1.0 / 10.0 },
-                { "A", 1.0 / 10.0 },
-                { "B1", 1.0 / 10.0 },
-                { "B2", 1.0 / 10.0 },
-                { "B3", 1.0 / 10.0 },
-                { "V", 1.0 / 10.0 },
-                { "W", 1.0 / 10.0 },
-                { "C", 1.0 / 10.0 },
-            }, 0.01);
-
-        return good1 && good2
-            && ph1.get_error_message().find("The non-empty pattern is expected.") != std::string::npos
+        return ph1.get_error_message().find("The non-empty pattern is expected.") != std::string::npos
             && ph1.get_error_message().find("A text is expected.") != std::string::npos
+            && ph1.get_error_message().find("The nonterminal \"main\" doesn't exist.\n") != std::string::npos
             && ph2.get_error_message().find("The non-empty pattern is expected.") != std::string::npos
             && ph2.get_error_message().find("A text is expected.") != std::string::npos
-            && ph1.get_number_of_syntax() == 2
-            && ph2.get_number_of_syntax() == 2
-            && ph1.get_weight() == 10
-            && ph2.get_weight() == 10
-            && ph1.get_combination_number() == 10
-            && ph2.get_combination_number() == 10;
+            && ph2.get_error_message().find("The nonterminal \"main\" doesn't exist.\n") != std::string::npos;
     });
 
-    ut.set_test("Move Assignment", [&]() {
+    ut.set_test("Move Assignment#1", [&]() {
+        tphrase::Generator ph1{R"(
+            main = {= X | Y | Z } | {A} | {B}
+
+            A = A1 | A2 | A3
+
+            B = B1 | B2 | B3
+        )"};
+        ph1.add(R"(
+            main = {= V | W } | {C}
+
+            C = C1 | C2 | C3
+        )");
+        tphrase::Generator ph2;
+        ph2 = std::move(ph1);
+        tphrase::Generator::set_random_function(get_default_random_func());
+        const bool good2 = check_distribution(ph2, 100000, {
+                { "X", 1.0 / 14.0 },
+                { "Y", 1.0 / 14.0 },
+                { "Z", 1.0 / 14.0 },
+                { "A1", 1.0 / 14.0 },
+                { "A2", 1.0 / 14.0 },
+                { "A3", 1.0 / 14.0 },
+                { "B1", 1.0 / 14.0 },
+                { "B2", 1.0 / 14.0 },
+                { "B3", 1.0 / 14.0 },
+                { "V", 1.0 / 14.0 },
+                { "W", 1.0 / 14.0 },
+                { "C1", 1.0 / 14.0 },
+                { "C2", 1.0 / 14.0 },
+                { "C3", 1.0 / 14.0 },
+            }, 0.01);
+
+        return good2
+            && ph2.get_error_message().empty()
+            && ph2.get_number_of_syntax() == 2
+            && ph2.get_weight() == 14
+            && ph2.get_combination_number() == 14;
+    });
+
+    ut.set_test("Move Assignment#2", [&]() {
         tphrase::Generator ph1{R"(
             main = {= X | Y | Z } | {A} | {B}
 
@@ -300,26 +408,9 @@ std::size_t test_class_Generator()
         )");
         tphrase::Generator ph2;
         ph2 = std::move(ph1);
-        tphrase::Generator::set_random_function(get_default_random_func());
-        const bool good2 = check_distribution(ph2, 100000, {
-                { "X", 1.0 / 10.0 },
-                { "Y", 1.0 / 10.0 },
-                { "Z", 1.0 / 10.0 },
-                { "A", 1.0 / 10.0 },
-                { "B1", 1.0 / 10.0 },
-                { "B2", 1.0 / 10.0 },
-                { "B3", 1.0 / 10.0 },
-                { "V", 1.0 / 10.0 },
-                { "W", 1.0 / 10.0 },
-                { "C", 1.0 / 10.0 },
-            }, 0.01);
-
-        return good2
-            && ph2.get_error_message().find("The non-empty pattern is expected.") != std::string::npos
+        return ph2.get_error_message().find("The non-empty pattern is expected.") != std::string::npos
             && ph2.get_error_message().find("A text is expected.") != std::string::npos
-            && ph2.get_number_of_syntax() == 2
-            && ph2.get_weight() == 10
-            && ph2.get_combination_number() == 10;
+            && ph2.get_error_message().find("The nonterminal \"main\" doesn't exist.\n") != std::string::npos;
     });
 
     ut.set_test("generate with no external context", [&]() {

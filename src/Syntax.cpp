@@ -62,11 +62,17 @@ namespace tphrase {
     Syntax::Impl::Impl(InputIteratorBase &it)
         : err_msg{}, data{parse(it, err_msg)}
     {
+        if (!err_msg.empty()) {
+            data.clear();
+        }
     }
 
     Syntax::Impl::Impl(InputIteratorBase &&it)
         : err_msg{}, data{parse(it, err_msg)}
     {
+        if (!err_msg.empty()) {
+            data.clear();
+        }
     }
 
 
@@ -173,9 +179,11 @@ namespace tphrase {
     {
         const std::size_t prev_len{pimpl->err_msg.size()};
         DataSyntax data{parse(it, pimpl->err_msg)};
-        pimpl->data.add(std::move(data));
-
-        return prev_len == pimpl->err_msg.size();
+        const bool good = prev_len == pimpl->err_msg.size();
+        if (good) {
+            pimpl->data.add(std::move(data));
+        }
+        return good;
     }
 
     const DataSyntax &Syntax::get_syntax_data() const

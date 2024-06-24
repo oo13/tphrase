@@ -47,6 +47,7 @@ namespace tphrase {
             \note Only the phrase syntax that contains the nonterminal "main" can add.
             \note The recursive reference to a nonterminal is not allowed.
             \note get_error_message() will return an empty string if no errors are detected.
+            \note An empty generator is created if some errors are detected.
         */
         explicit Generator(const Syntax &syntax);
         /** The constructor to create an instance that has a syntax.
@@ -55,6 +56,7 @@ namespace tphrase {
             \note The recursive reference to a nonterminal is not allowed.
             \note All the errors in syntax is moved.
             \note get_error_message() will return an empty string if no errors are detected and moved.
+            \note An empty generator is created if some errors are detected.
         */
         explicit Generator(Syntax &&syntax);
         /** The copy constructor.
@@ -83,11 +85,13 @@ namespace tphrase {
 
         /** Generate a phrase.
             \return A phrase.
+            \note The empty generator returns "nil".
         */
         std::string generate() const;
         /** Generate a phrase.
             \param [in] ext_context The external context that has some nonterminals and the substitutions.
             \return A phrase.
+            \note The empty generator returns "nil".
         */
         std::string generate(const ExtContext_t &ext_context) const;
 
@@ -96,6 +100,7 @@ namespace tphrase {
             \return true if no errors are detected.
             \note Only the phrase syntax that contains the nonterminal "main" can add.
             \note The recursive reference to a nonterminal is not allowed.
+            \note No phrase syntax is added if some errors are detected.
         */
         bool add(const Syntax &syntax);
         /** Add a phrase syntax.
@@ -104,6 +109,7 @@ namespace tphrase {
             \note Only the phrase syntax that contains the nonterminal "main" can add.
             \note The recursive reference to a nonterminal is not allowed.
             \note All the errors in syntax is added.
+            \note No phrase syntax is added if some errors are detected.
         */
         bool add(Syntax &&syntax);
 
@@ -189,6 +195,7 @@ namespace tphrase {
             \note The instance doesn't use begin, end, and something referred by begin after returning from the constructor.
             \note Some parse errors may be detected if src has errors.
             \note get_error_message() will return an empty string if no errors are detected.
+            \note An empty phrase syntax is created if some errors are detected.
             \attention std::istream_iterator skips any white spaces by default, so you should configure the target input stream not to skip the spaces (stream.unsetf(std::ios_base::skipws)) if you want to use an istream_iterator.
         */
         template<typename T, typename S> REQUIRES_CharInputIteratorConcept(T, S)
@@ -197,12 +204,14 @@ namespace tphrase {
             \param [in] src The source text of a phrase syntax.
             \note Some parse errors may be detected if src has errors.
             \note get_error_message() will return an empty string if no errors are detected.
+            \note An empty phrase syntax is created if some errors are detected.
         */
         Syntax(const std::string &src);
         /** The constructor to create an instance that has a syntax.
             \param [in] src The source text of a phrase syntax.
             \note Some parse errors may be detected if src has errors.
             \note get_error_message() will return an empty string if no errors are detected.
+            \note An empty phrase syntax is created if some errors are detected.
         */
         Syntax(const char *src);
         /** The copy constructor.
@@ -250,6 +259,7 @@ namespace tphrase {
             \note The instance doesn't use begin, end, and something referred by begin after returning from the function.
             \note The production rules for the existing nonterminals is overwritten if the source Syntax has the assignment for the same nonterminal.
             \note Some parse errors may be detected if src has errors.
+            \note No phrase syntax is added if some errors are detected.
             \attention std::istream_iterator skips any white spaces by default, so you should configure the target input stream not to skip the spaces (stream.unsetf(std::ios_base::skipws)) if you want to use an istream_iterator.
         */
         template<typename T, typename S> REQUIRES_CharInputIteratorConcept(T, S)
@@ -259,6 +269,7 @@ namespace tphrase {
             \return true if no errors are detected.
             \note The production rules for the existing nonterminals is overwritten if the source Syntax has the assignment for the same nonterminal.
             \note Some parse errors may be detected if src has errors.
+            \note No phrase syntax is added if some errors are detected.
         */
         bool add(const std::string &src);
         /** Add the assignments from a phrase syntax.
@@ -266,6 +277,7 @@ namespace tphrase {
             \return true if no errors are detected.
             \note The production rules for the existing nonterminals is overwritten if the source Syntax has the assignment for the same nonterminal.
             \note Some parse errors may be detected if src has errors.
+            \note No phrase syntax is added if some errors are detected.
         */
         bool add(const char *src);
 
