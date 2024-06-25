@@ -403,5 +403,30 @@ std::size_t test_generate()
             && ph.get_error_message().empty();
     });
 
+    ut.set_test("Sharing Local Nonterminal", [&]() {
+        tphrase::Syntax common(R"(
+            sub = {_sub2}
+            _sub2 = {sub3}
+        )");
+        tphrase::Syntax main1(R"(
+            main = {sub}
+            sub3 = 1
+        )");
+        tphrase::Syntax main2(R"(
+            main = {sub}
+            sub3 = 2
+        )");
+        main1.add(common);
+        main2.add(common);
+        tphrase::Generator ph1(main1);
+        tphrase::Generator ph2(main2);
+        return ph1.generate() == "1" && ph2.generate() == "2"
+            && common.get_error_message().empty()
+            && main1.get_error_message().empty()
+            && main2.get_error_message().empty()
+            && ph1.get_error_message().empty()
+            && ph2.get_error_message().empty();
+    });
+
     return ut.run();
 }
