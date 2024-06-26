@@ -237,15 +237,15 @@ The text doesn't need to enclose quotations ('"', "'", or "`") if it meets these
 The text may have expansions, which is a string enclosed by "{" and "}". The text can contain "{" only as the beginning of the expansion, and the expansion can include any character except "}". The rule is prior to the above rules, for example &quot; {&quot;} &quot; is a valid text.
 
 ## Expansion
-The string enclosed by "{" and "}" is the expansion, which will be expanded into a text. "{" and "}" can enclose any character except "}".
+The string enclosed by "{" and "}" is the expansion, which will be expanded into a text. "{" and "}" can enclose any character except "}". If the string enclosed "{" and "}" has only alphabet, numeric, and low line characters ("[A-Za-z0-9_]"), the enclosed string is a nonterminal.
 
-1. If the string enclosed "{" and "}" has only alphabet, numeric, and low line characters ("[A-Za-z0-9_]"), it's a nonterminal. If the nonterminal is assigned to a production rule, the expansion will be expanded in the generated text.
-1. If the external context specifies the substitution for the global nonterminal, it's applied.
+1. If the nonterminal is assigned to a production rule, the expansion will be expanded in the generated text.
+1. The local unsolved nonterminal occurs an error.
+1. If the external context specifies the substitution for the global unsolved nonterminal, it's applied.
 1. "{(}" and "{)}" will be expanded into "{" and "}".
 1. If the beginning of the expansion is "{*", the expansion will be expanded into the empty string. (Technically speaking, it's not a comment block.)
 1. If the beginning of the expansion is "{=" or "{:=", the content (except the first "=" or ":=") is considered as a production rule. For example, "{= A|B|C}" will be expanded into the result of the production rule "A|B|C". The syntax of the content is expressed by EBNF: `content = space_nl_opt, production_rule, space_nl_opt ;` "{:=" is, of course, the equalized select version of "{=".
-1. The global unsolved expansion will be expanded into itself removed outer "{" and "}". (I recommend that the nonterminal is noticeable to find it easily unless you will leave it unsolved.)
-1. The local unsolved expansion occurs an error.
+1. The other expansion will be expanded into itself removed outer "{" and "}". (I recommend that the nonterminal is noticeable to find it easily unless you will leave it unsolved.)
 
 ## Gsub (Global substitution)
 Gsub is the function to substitute the resulting string selected from the options. You can specify any number (including zero) of gsubs that substitute the string. 1st gsub specifies the substitution of the selected text out of the options, and then the result of the preceding substitution is substituted by the next gsub's.
