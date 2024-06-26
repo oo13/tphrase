@@ -68,13 +68,13 @@ namespace tphrase {
 
     void
     DataOptions::bind_syntax(DataSyntax &syntax,
-                             std::unordered_set<std::string> &used_nonterminals,
+                             int epoch,
                              std::string &err_msg)
     {
         double sum{0.0};
         auto it = weights.begin();
         for (auto &t : texts) {
-            t.bind_syntax(syntax, used_nonterminals, err_msg);
+            t.bind_syntax(syntax, epoch, err_msg);
             sum += t.get_weight();
             *it = sum;
             ++it;

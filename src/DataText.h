@@ -27,7 +27,6 @@
 #include <cstddef>
 #include <functional>
 #include <string>
-#include <unordered_set>
 #include <vector>
 
 #include "tphrase/common/ext_context.h"
@@ -36,14 +35,17 @@ namespace tphrase {
     class DataProductionRule;
     class DataSyntax;
 
-    /** The data structure representing the text. */
+    /** The data structure representing the text.
+        \note The instance bound on a syntax doesn't own the syntax, so the users must keep the syntax alive until the instance is unused.
+        \note The copied instance is unbound.
+    */
     class DataText {
     public:
         /** The default constructor. */
         DataText();
         /** The copy constructor.
             \param [in] a The source.
-            \note The new instance is bound on no syntax.
+            \note The new instance is unbound.
         */
         DataText(const DataText &a);
         /** The move constructor.
@@ -57,7 +59,7 @@ namespace tphrase {
         /** The assignment.
             \param [in] a The source.
             \return *this
-            \note The destination instance is bound on no syntax.
+            \note The destination instance is unbound.
         */
         DataText &operator=(const DataText &a);
         /** The move assignment.
@@ -107,13 +109,12 @@ namespace tphrase {
 
         /** Bind the instance on a syntax.
             \param [inout] syntax The syntax to be bound on.
-            \param [inout] used_nonterminals The set of the nonterminals that have already used for an expansion.
+            \param [in] epoch The current binding epoch.
             \param [inout] err_msg The error messages are added if some errors are detected.
-            \note used_nonterminals is non-const but the items in the set won't be changed. Some items will be added, and then removed.
-            \note An error is detected if the nonterminal existing in used_nonterminals uses for an expansion again.
+            \note An error message is added to err_msg if this instance detects a recursive expansion.
         */
         void bind_syntax(DataSyntax &syntax,
-                         std::unordered_set<std::string> &used_nonterminals,
+                         int epoch,
                          std::string &err_msg);
 
         /** Fix the reference to the local nonterminal.

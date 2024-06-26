@@ -428,5 +428,53 @@ std::size_t test_generate()
             && ph2.get_error_message().empty();
     });
 
+    ut.set_test("Sharing Rule", [&]() {
+        tphrase::Generator ph(R"(
+            main = {A} | {B} | {C}
+            A = A1 A2 {COMMON} | A3 {AB} A4 | {AC} A5 A6
+            B = B1 B2 {BA} | B3 {COMMON} B4 | {BC} B5 B6
+            C = C1 C2 {CA} | C3 {CB} C4 | {COMMON} C5 C6
+            AB = AB1
+            AC = AC1
+            BA = BA1 | "BA2" 2
+            BC = BC1 | BC2
+            CA = CA1 | CA2 | "CA3" 3
+            CB = CB1 | CB2 | CB3
+            COMMON = "1" 2 | {AB} | "2" 3 | {AC} | "3" 4 | {BA} | 4 | {BC} | 5 | {CA} | 6 | {CB} | 7
+        )");
+        return ph.generate() == "A1 A2 1"
+            && ph.get_combination_number() == 19 + 2 + 19 + 4 + 19 + 6
+            && ph.get_weight() == 28 + 2 + 28 + 5 + 28 + 8
+            && ph.get_error_message().empty();
+    });
+
+    ut.set_test("Sharing Rule and Sharing Syntax", [&]() {
+        tphrase::Syntax syntax{R"(
+            main = {A} | {B} | {C}
+            A = A1 A2 {COMMON} | A3 {AB} A4 | {AC} A5 A6
+            B = B1 B2 {BA} | B3 {COMMON} B4 | {BC} B5 B6
+            C = C1 C2 {CA} | C3 {CB} C4 | {COMMON} C5 C6
+            AB = AB1
+            AC = AC1
+            BA = BA1 | "BA2" 2
+            BC = BC1 | BC2
+            CA = CA1 | CA2 | "CA3" 3
+            CB = CB1 | CB2 | CB3
+            COMMON = "1" 2 | {AB} | "2" 3 | {AC} | "3" 4 | {BA} | 4 | {BC} | 5 | {CA} | 6 | {CB} | 7
+        )"};
+        tphrase::Generator ph1{syntax};
+        syntax.add("CB = ''");
+        tphrase::Generator ph2{syntax};
+        return ph1.generate() == "A1 A2 1"
+            && ph2.generate() == "A1 A2 1"
+            && ph1.get_combination_number() == 19 + 2 + 19 + 4 + 19 + 6
+            && ph2.get_combination_number() == 17 + 2 + 17 + 4 + 17 + 4
+            && ph1.get_weight() == 28 + 2 + 28 + 5 + 28 + 8
+            && ph2.get_weight() == 26 + 2 + 26 + 5 + 26 + 6
+            && syntax.get_error_message().empty()
+            && ph1.get_error_message().empty()
+            && ph2.get_error_message().empty();
+    });
+
     return ut.run();
 }

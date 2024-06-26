@@ -106,12 +106,12 @@ namespace tphrase {
         /** Add a pair of a nonterminal and a production rule.
             \param [inout] nonterminal The nonterminal. (moved)
             \param [inout] rule The production rule to be assigned to the nonterminal. (moved)
-            \note It has a side effect to unbind the instance.
+            \note It has a side effect to make the instance the unbound state (although the object that was bound on this remains bound on it).
         */
         void add(std::string &&nonterminal, DataProductionRule &&rule);
         /** Add a set of the assignments.
             \param [inout] syntax The syntax with the assignments to be added. (moved)
-            \note It has a side effect to unbind the instance.
+            \note It has a side effect to make the instance the unbound state (although the object that was bound on this remains bound on it).
         */
         void add(DataSyntax &&syntax);
 
@@ -135,6 +135,7 @@ namespace tphrase {
         std::unordered_map<std::string, DataProductionRule> assignments; /**< The assignments in the syntax. */
         DataProductionRule *main_rule; /**< The pointer to the production rule assigned to the nonterminal "main". */
         bool is_bound; /**< The instance is successfully bound. */
+        int binding_epoch; /**< The binding epoch. */
     };
 
     inline

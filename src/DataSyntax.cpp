@@ -68,14 +68,16 @@ namespace tphrase {
     DataSyntax::DataSyntax()
         : assignments{},
           main_rule{nullptr},
-          is_bound{false}
+          is_bound{false},
+          binding_epoch{0}
     {
     }
 
     DataSyntax::DataSyntax(const DataSyntax &a)
         : assignments{a.assignments},
           main_rule{get_main_rule(assignments)},
-          is_bound{false}
+          is_bound{false},
+          binding_epoch{0}
     {
         if (a.is_bound) {
             std::string err_msg;
@@ -88,6 +90,7 @@ namespace tphrase {
         assignments = a.assignments;
         main_rule = get_main_rule(assignments);
         is_bound = false;
+        binding_epoch = 0;
         if (a.is_bound) {
             std::string err_msg;
             bind_syntax(err_msg); // It should not generate any error messages.
@@ -164,9 +167,13 @@ namespace tphrase {
         if (is_bound || !main_rule) {
             return;
         } else {
+            ++binding_epoch;
+            // The three variations (initial, current, not current) are enough to distinguish the binding epoch, even if you call a function of DataSyntax class directly. (It's generally 0 or 1 because the functions of class Syntax and Generator call neither add() nor bind_syntax() to the syntax that already bound.)
+            if (binding_epoch > 2) {
+                binding_epoch = 1;
+            }
             const std::size_t prev_len{err_msg.size()};
-            std::unordered_set<std::string> used_nonterminals{ nonterminal_main };
-            main_rule->bind_syntax(*this, used_nonterminals, err_msg);
+            main_rule->bind_syntax(*this, binding_epoch, err_msg);
             is_bound = err_msg.size() == prev_len;
         }
     }
@@ -190,5 +197,6 @@ namespace tphrase {
         assignments.clear();
         main_rule = nullptr;
         is_bound = false;
+        binding_epoch = 0;
     }
 }

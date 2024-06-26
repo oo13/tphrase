@@ -27,13 +27,49 @@
 
 namespace tphrase {
 
-    DataProductionRule::DataProductionRule(DataOptions &&in_options, DataGsubs &&in_gsubs)
-        : options{std::move(in_options)}, gsubs{std::move(in_gsubs)}
+    DataProductionRule::DataProductionRule(const DataProductionRule &a)
+        : options{a.options},
+          gsubs{a.gsubs},
+          binding_epoch{0}
     {
+    }
+
+    DataProductionRule::DataProductionRule(DataOptions &&in_options, DataGsubs &&in_gsubs)
+        : options{std::move(in_options)},
+          gsubs{std::move(in_gsubs)},
+          binding_epoch{0}
+    {
+    }
+
+    DataProductionRule &DataProductionRule::operator=(const DataProductionRule &a)
+    {
+        options = a.options;
+        gsubs = a.gsubs;
+        binding_epoch = 0;
+        return *this;
     }
 
     std::string DataProductionRule::generate(const ExtContext_t &ext_context) const
     {
         return gsubs.gsub(options.generate(ext_context));
+    }
+
+    bool
+    DataProductionRule::bind_syntax(DataSyntax &syntax,
+                                    int epoch,
+                                    std::string &err_msg)
+    {
+        if (binding_epoch < 0) {
+            // Recursion
+            return false;
+        } else if (binding_epoch == epoch) {
+            // Already bound.
+            return true;
+        }
+
+        binding_epoch = -1;
+        options.bind_syntax(syntax, epoch, err_msg);
+        binding_epoch = epoch;
+        return true;
     }
 }

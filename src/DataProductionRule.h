@@ -26,7 +26,6 @@
 
 #include <cstddef>
 #include <string>
-#include <unordered_set>
 
 #include "tphrase/common/ext_context.h"
 #include "DataOptions.h"
@@ -37,6 +36,7 @@ namespace tphrase {
 
     /** The data structure representing the production rule.
         \note The instance bound on a syntax doesn't own the syntax, so the users must keep the syntax alive until the instance is unused.
+        \note The copied instance is unbound.
     */
     class DataProductionRule {
     public:
@@ -48,9 +48,9 @@ namespace tphrase {
         DataProductionRule(DataOptions &&options, DataGsubs &&gsubs);
         /** The copy constructor.
             \param [in] a The source.
-            \note The new instance is bound on no syntax.
+            \note The new instance is unbound.
         */
-        DataProductionRule(const DataProductionRule &a) = default;
+        DataProductionRule(const DataProductionRule &a);
         /** The move constructor.
             \param [inout] a The source.
         */
@@ -59,9 +59,9 @@ namespace tphrase {
         /** The assignment.
             \param [in] a The source.
             \return *this
-            \note The destination instance is bound on no syntax.
+            \note The destination instance is unbound.
         */
-        DataProductionRule &operator=(const DataProductionRule &a) = default;
+        DataProductionRule &operator=(const DataProductionRule &a);
         /** The move assignment.
             \param [inout] a The source. (moved)
             \return *this
@@ -91,13 +91,14 @@ namespace tphrase {
 
         /** Bind the instance on a syntax.
             \param [inout] syntax The syntax to be bound on.
-            \param [inout] used_nonterminals The set of the nonterminals that have already used for an expansion.
+            \param [in] epoch The current binding epoch.
             \param [inout] err_msg The error messages are added if some errors are detected.
-            \note used_nonterminals is non-const but the items in the set won't be changed. Some items will be added, and then removed.
-            \note An error is detected if the nonterminal existing in used_nonterminals uses for an expansion again.
+            \return false if the function call is recursive.
+            \note No err_msg is added if false is returned.
+            \note An error message is added to err_msg if a text in this instance detects a recursive expansion.
         */
-        void bind_syntax(DataSyntax &syntax,
-                         std::unordered_set<std::string> &used_nonterminals,
+        bool bind_syntax(DataSyntax &syntax,
+                         int epoch,
                          std::string &err_msg);
 
         /** Fix the reference to the local nonterminal.
@@ -111,6 +112,7 @@ namespace tphrase {
     private:
         DataOptions options; /**< The options in the production rule. */
         DataGsubs gsubs; /**< The gsubs in the production rule. */
+        int binding_epoch; /**< The binding epoch. */
     };
 
     inline
@@ -129,15 +131,6 @@ namespace tphrase {
     void DataProductionRule::equalize_chance(bool enable)
     {
         options.equalize_chance(enable);
-    }
-
-    inline
-    void
-    DataProductionRule::bind_syntax(DataSyntax &syntax,
-                                    std::unordered_set<std::string> &used_nonterminals,
-                                    std::string &err_msg)
-    {
-        return options.bind_syntax(syntax, used_nonterminals, err_msg);
     }
 
     inline

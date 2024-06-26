@@ -162,26 +162,22 @@ namespace tphrase {
 
     void
     DataText::bind_syntax(DataSyntax &syntax,
-                          std::unordered_set<std::string> &used_nonterminals,
+                          int epoch,
                           std::string &err_msg)
     {
         double tmp_weight{1.0};
         comb = 1;
         for (auto &p : parts) {
             if (p.kind == Part_t::Kind_t::ANONYMOUS_RULE) {
-                p.r->bind_syntax(syntax, used_nonterminals, err_msg);
+                p.r->bind_syntax(syntax, epoch, err_msg);
             } else if (p.kind == Part_t::Kind_t::EXPANSION) {
-                p.r = nullptr;
                 if (syntax.has_nonterminal(p.s)) {
-                    if (used_nonterminals.find(p.s) != used_nonterminals.end()) {
+                    p.r = &syntax.get_production_rule(p.s);
+                    if (!p.r->bind_syntax(syntax, epoch, err_msg)) {
+                        p.r = nullptr;
                         err_msg += "Recursive expansion of \"";
                         err_msg += p.s;
                         err_msg += "\" is detected.\n";
-                    } else {
-                        p.r = &syntax.get_production_rule(p.s);
-                        used_nonterminals.insert(p.s);
-                        p.r->bind_syntax(syntax, used_nonterminals, err_msg);
-                        used_nonterminals.erase(p.s);
                     }
                 }
             }
