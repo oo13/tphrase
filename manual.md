@@ -230,8 +230,8 @@ The chance of "text1" is 25%, "text2" is 25%, "{C}" is 50%. The chance of "{C}" 
 The text doesn't need to enclose quotations ('"', "'", or "`") if it meets these requirements:
    1. The text is not empty.
    1. The text has neither newline, "|", "~", nor "}" except for a part of an expansion.
-   1. The beginning of the text is other than the spaces and quotations. (The spaces preceded by the text are not a part of the text. The expansion is a part of the text even if the expansion results the spaces or the empty string.)
-   1. The end of the text is not the spaces. (The spaces succeeded by the text are not a part of the text. The expansion is a part of the text even if the expansion results the spaces or the empty string.)
+   1. The beginning of the text is other than the spaces and quotations. (The spaces preceding the text are not a part of the text. The expansion is a part of the text even if the expansion results the spaces or the empty string.)
+   1. The end of the text is not the spaces. (The spaces succeeding the text are not a part of the text. The expansion is a part of the text even if the expansion results the spaces or the empty string.)
    1. The text is not followed by a weight number. (The number is a part of the text.)
 
 The text may have expansions, which is a string enclosed by "{" and "}". The text can contain "{" only as the beginning of the expansion, and the expansion can include any character except "}". The rule is prior to the above rules, for example &quot; {&quot;} &quot; is a valid text.
