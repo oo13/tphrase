@@ -202,7 +202,7 @@ A22 = 5 | 6 | 7 | 8 | 9
 ```
 The chance to select {A21} is 35%, {A22} is 35%. {A1} and {A2} aren't affected by ":=". (cf. The weight propagates the higher layers.)
 
-The nonterminal starts with "_" is  a local nonterminal that is visible only from the same compile unit.
+The nonterminal starts with "_" is a local nonterminal that is visible only from the same compile unit.
 
 ## Production rule
 
@@ -230,14 +230,14 @@ The chance of "text1" is 25%, "text2" is 25%, "{C}" is 50%. The chance of "{C}" 
 The text doesn't need to enclose quotations ('"', "'", or "`") if it meets these requirements:
    1. The text is not empty.
    1. The text has neither newline, "|", "~", nor "}" except for a part of an expansion.
-   1. The beginning of the text is other than the spaces and quotations. (The spaces preceded by the text are not a part of the text.)
+   1. The beginning of the text is other than the spaces and quotations. (The spaces preceded by the text are not a part of the text. The expansion is a part of the text even if the expansion results the spaces or the empty string.)
    1. The end of the text is not the spaces. (The spaces succeeded by the text are not a part of the text. The expansion is a part of the text even if the expansion results the spaces or the empty string.)
    1. The text is not followed by a weight number. (The number is a part of the text.)
 
 The text may have expansions, which is a string enclosed by "{" and "}". The text can contain "{" only as the beginning of the expansion, and the expansion can include any character except "}". The rule is prior to the above rules, for example &quot; {&quot;} &quot; is a valid text.
 
 ## Expansion
-The string enclosed by "{" and "}" is the expansion, which will be expanded into a text. "{" and "}" can enclose any character except "}". If the string enclosed "{" and "}" has only alphabet, numeric, and low line characters ("[A-Za-z0-9_]"), the enclosed string is a nonterminal.
+The string enclosed by "{" and "}" is the expansion, which will be expanded into a text. "{" and "}" can enclose any character except "}". If the string enclosed "{" and "}" has only alphabet, numeric, and low line characters ("[A-Za-z0-9_]"), the enclosed string is a nonterminal. The nonterminal starts with "_" is a local nonterminal.
 
 1. If the nonterminal is assigned to a production rule, the expansion will be expanded in the generated text.
 1. The local unsolved nonterminal occurs an error.
@@ -288,7 +288,7 @@ text = text_begin, [ text_body, [ text_postfix ] ] |
        "`", [ { ? [^`{] ? | expansion } ], "`", space_opt, [ weight ] ;
 text_begin = ? [^ \t\n"'`|~{}] ? | expansion ; (* "}" is the next to the text when it's in {= ...}. *)
 text_body = { ? [^\n|~{}] ? | expansion } ;
-text_postfix = space_opt, ( $ | '\n' | '|' | '~' | '}' ) ; (* This space_opt is greedy match. It isn't a part of the text. *)
+text_postfix = ? space_opt(?=($|[\n|~}])) ? ; (* text_postfix greedily matches with space_opt preceding the end of the text, newline, "|", "~", or "}", but it consumes only space_opt. *)
 expansion = "{", [ { ? [^}] ? } ], "}" ;
 weight = ( ( { ? [0-9] ? }, [ "." ] ) | ( ".", ? [0-9] ? ) ), [ { ? [0-9] ? } ] ;
 
