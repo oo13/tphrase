@@ -83,6 +83,36 @@ std::size_t test_class_Generator()
             && ph.get_error_message().find("The nonterminal \"main\" doesn't exist.\n") != std::string::npos;
     });
 
+    ut.set_test("Constructor with Syntax (copy) and start condition", [&]() {
+        tphrase::Syntax syntax{R"(
+            main2 = {:= A | B | C } | {Y} | {Z}
+
+            Y = Y1 | Y2 | Y3 |
+
+            Z = Z1 | Z2 | Z3
+        )"};
+        tphrase::Generator ph{syntax, "main2"};
+        auto r = ph.generate();
+        return r == "nil"
+            && syntax.get_error_message().find("A text is expected.") != std::string::npos
+            && ph.get_error_message().find("The nonterminal \"main2\" doesn't exist.\n") != std::string::npos;
+    });
+
+    ut.set_test("Constructor with Syntax (move) and start condition", [&]() {
+        tphrase::Syntax syntax{R"(
+            main3 = {:= A | B | C } | {Y} | {Z}
+
+            Y = Y1 | Y2 | Y3 |
+
+            Z = Z1 | Z2 | Z3
+        )"};
+        tphrase::Generator ph{std::move(syntax), "main3"};
+        auto r = ph.generate();
+        return r == "nil"
+            && ph.get_error_message().find("A text is expected.") != std::string::npos
+            && ph.get_error_message().find("The nonterminal \"main3\" doesn't exist.\n") != std::string::npos;
+    });
+
     ut.set_test("Constructor via R-Value Syntax (a pair of input iterators)", [&]() {
         std::istringstream s{R"(
             main = {:= X | Y | Z } | {A} | {B}
@@ -467,6 +497,44 @@ std::size_t test_class_Generator()
             C = C1 | C2 | C3
         )"};
         ph.add(std::move(syntax));
+        auto r = ph.generate();
+        return r == "X"
+            && ph.get_error_message().empty()
+            && ph.get_number_of_syntax() == 2
+            && ph.get_weight() == 14
+            && ph.get_combination_number() == 14;
+    });
+
+    ut.set_test("Add syntax (copy) with start condition", [&]() {
+        tphrase::Generator ph{R"(
+            main = {= X | Y | Z } | {A} | {B}
+            A = A1 | A2 | A3
+            B = B1 | B2 | B3
+        )"};
+        tphrase::Syntax syntax{R"(
+            main2 = {= V | W } | {C}
+            C = C1 | C2 | C3
+        )"};
+        ph.add(syntax, "main2");
+        auto r = ph.generate();
+        return r == "X"
+            && ph.get_error_message().empty()
+            && ph.get_number_of_syntax() == 2
+            && ph.get_weight() == 14
+            && ph.get_combination_number() == 14;
+    });
+
+    ut.set_test("Add syntax (move) with start condition", [&]() {
+        tphrase::Generator ph{R"(
+            main = {= X | Y | Z } | {A} | {B}
+            A = A1 | A2 | A3
+            B = B1 | B2 | B3
+        )"};
+        tphrase::Syntax syntax{R"(
+            main3 = {= V | W } | {C}
+            C = C1 | C2 | C3
+        )"};
+        ph.add(std::move(syntax), "main3");
         auto r = ph.generate();
         return r == "X"
             && ph.get_error_message().empty()

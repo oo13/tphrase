@@ -21,29 +21,12 @@
     \endparblock
 */
 
+#include <limits>
 #include <stdexcept>
 
 #include "DataSyntax.h"
 
 namespace {
-    /** A common nonterminal name "main". */
-    const std::string nonterminal_main{"main"};
-
-    /** Get the production rule assigned to the nonterminal "main".
-        \param [in] m The assignments in the syntax.
-        \return The production rule assigned to the nonterminal "main" if it exists. If not, nullptr is returned.
-    */
-    tphrase::DataProductionRule
-    *get_main_rule(std::unordered_map<std::string, tphrase::DataProductionRule> &m)
-    {
-        auto it = m.find(nonterminal_main);
-        if (it != m.end()) {
-            return &it->second;
-        } else {
-            return nullptr;
-        }
-    }
-
     /** Insert an item, but assign the item if it already exists.
         \param [in] m The target map.
         \param [inout] k The key. (moved)
@@ -67,7 +50,8 @@ namespace {
 namespace tphrase {
     DataSyntax::DataSyntax()
         : assignments{},
-          main_rule{nullptr},
+          last_start_condition{},
+          start_rule{nullptr},
           is_bound{false},
           binding_epoch{0}
     {
@@ -75,25 +59,27 @@ namespace tphrase {
 
     DataSyntax::DataSyntax(const DataSyntax &a)
         : assignments{a.assignments},
-          main_rule{get_main_rule(assignments)},
+          last_start_condition{a.last_start_condition},
+          start_rule{nullptr},
           is_bound{false},
           binding_epoch{0}
     {
         if (a.is_bound) {
             std::string err_msg;
-            bind_syntax(err_msg); // It should not generate any error messages.
+            bind_syntax(last_start_condition, err_msg); // It should not generate any error messages.
         }
     }
 
     DataSyntax &DataSyntax::operator=(const DataSyntax &a)
     {
         assignments = a.assignments;
-        main_rule = get_main_rule(assignments);
+        last_start_condition = a.last_start_condition;
+        start_rule = nullptr;
         is_bound = false;
         binding_epoch = 0;
         if (a.is_bound) {
             std::string err_msg;
-            bind_syntax(err_msg); // It should not generate any error messages.
+            bind_syntax(last_start_condition, err_msg); // It should not generate any error messages.
         }
         return *this;
     }
@@ -101,7 +87,7 @@ namespace tphrase {
     std::string DataSyntax::generate(const ExtContext_t &ext_context) const
     {
         if (is_valid()) {
-            return main_rule->generate(ext_context);
+            return start_rule->generate(ext_context);
         } else {
             return "nil";
         }
@@ -110,7 +96,7 @@ namespace tphrase {
     double DataSyntax::get_weight() const
     {
         if (is_valid()) {
-            return main_rule->get_weight();
+            return start_rule->get_weight();
         } else {
             return 0.0;
         }
@@ -119,7 +105,7 @@ namespace tphrase {
     std::size_t DataSyntax::get_combination_number() const
     {
         if (is_valid()) {
-            return main_rule->get_combination_number();
+            return start_rule->get_combination_number();
         } else {
             return 0;
         }
@@ -148,7 +134,6 @@ namespace tphrase {
     void DataSyntax::add(std::string &&nonterminal, DataProductionRule &&rule)
     {
         insert_or_assign(assignments, std::move(nonterminal), std::move(rule));
-        main_rule = get_main_rule(assignments);
         is_bound = false;
     }
 
@@ -158,24 +143,44 @@ namespace tphrase {
             std::string s{it.first};
             insert_or_assign(assignments, std::move(s), std::move(it.second));
         }
-        main_rule = get_main_rule(assignments);
         is_bound = false;
     }
 
-    void DataSyntax::bind_syntax(std::string &err_msg)
+    bool DataSyntax::bind_syntax(const std::string &start_condition, std::string &err_msg)
     {
-        if (is_bound || !main_rule) {
-            return;
-        } else {
-            ++binding_epoch;
-            // The three variations (initial, current, not current) are enough to distinguish the binding epoch, even if you call a function of DataSyntax class directly. (It's generally 0 or 1 because the functions of class Syntax and Generator call neither add() nor bind_syntax() to the syntax that already bound.)
-            if (binding_epoch > 2) {
-                binding_epoch = 1;
+        bool rule_changed{false};
+        auto it = assignments.find(start_condition);
+        if (it != assignments.end()) {
+            if (start_rule != &it->second) {
+                start_rule = &it->second;
+                rule_changed = true;
             }
-            const std::size_t prev_len{err_msg.size()};
-            main_rule->bind_syntax(*this, binding_epoch, err_msg);
-            is_bound = err_msg.size() == prev_len;
+        } else {
+            start_rule = nullptr;
+            is_bound = false;
+            err_msg += "The nonterminal \"";
+            err_msg += start_condition;
+            err_msg += "\" doesn't exist.\n";
+            return false;
         }
+
+        ++binding_epoch;
+        // It's generally 0 or 1 because the functions of class Syntax and Generator don't call bind_syntax() to the syntax that already bound. (The three variations (initial, current, not current) are enough to distinguish the binding epoch unless start_condition is changed.)
+        if (binding_epoch == std::numeric_limits<int>::max()) {
+            binding_epoch = 1;
+
+            if (rule_changed) {
+                // Reset the epoch.
+                std::string waste_err_msg;
+                start_rule->bind_syntax(*this, binding_epoch, waste_err_msg);
+                binding_epoch = 2;
+            }
+        }
+        const std::size_t prev_len{err_msg.size()};
+        start_rule->bind_syntax(*this, binding_epoch, err_msg);
+        is_bound = err_msg.size() == prev_len;
+        last_start_condition = start_condition;
+        return is_bound;
     }
 
     void DataSyntax::fix_local_nonterminal(std::string &err_msg)
@@ -195,7 +200,8 @@ namespace tphrase {
     void DataSyntax::clear()
     {
         assignments.clear();
-        main_rule = nullptr;
+        last_start_condition.clear();
+        start_rule = nullptr;
         is_bound = false;
         binding_epoch = 0;
     }

@@ -93,13 +93,9 @@ namespace tphrase {
         */
         DataProductionRule &get_production_rule(const std::string &nonterminal);
 
-        /** Does the instance has the nonterminal "main"?
-            \return The instance has the nonterminal "main".
-        */
-        bool has_main() const;
         /** Is the instance able to generate a phrase?
             \return The instance is able to generate a phrase.
-            \note Is means the instance has the nonterminal "main" and is successfully bound.
+            \note Is means the instance has the production rule assigned to the start condition and is successfully bound.
         */
         bool is_valid() const;
 
@@ -116,11 +112,14 @@ namespace tphrase {
         void add(DataSyntax &&syntax);
 
         /** Try to bind the expansions on the nonterminals in this.
+            \param [in] start_condition The nonterminal where is the start condition.
             \param [inout] err_msg The error messages are added if some errors are detected.
-            \note Only the nonterminals that are directly or indirectly referred by "main" are tried binding.
+            \return true if no errors are detected.
+            \note Only the nonterminals that are directly or indirectly referred by the start condition are tried binding.
             \note An error is caused if the recursive reference to a nonterminal exists.
+            \note An error is cause if the nonterminal start_condition doesn't exist.
         */
-        void bind_syntax(std::string &err_msg);
+        bool bind_syntax(const std::string &start_condition, std::string &err_msg);
 
         /** Fix the reference to the local nonterminal.
             \param [inout] err_msg The error messages are added if some errors are detected.
@@ -133,21 +132,16 @@ namespace tphrase {
 
     private:
         std::unordered_map<std::string, DataProductionRule> assignments; /**< The assignments in the syntax. */
-        DataProductionRule *main_rule; /**< The pointer to the production rule assigned to the nonterminal "main". */
+        std::string last_start_condition; /**< The nonterminal where is the start condition used by the last binding. */
+        DataProductionRule *start_rule; /**< The pointer to the production rule assigned to the start condition. */
         bool is_bound; /**< The instance is successfully bound. */
         int binding_epoch; /**< The binding epoch. */
     };
 
     inline
-    bool DataSyntax::has_main() const
-    {
-        return main_rule;
-    }
-
-    inline
     bool DataSyntax::is_valid() const
     {
-        return is_bound && has_main();
+        return is_bound;
     }
 
 }

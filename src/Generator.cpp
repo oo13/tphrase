@@ -32,6 +32,9 @@
 namespace {
     /** The predefined empty external context. */
     const tphrase::ExtContext_t empty_context;
+
+    /** The default start condition. */
+    const std::string default_start_condition{"main"};
 }
 
 namespace tphrase {
@@ -69,15 +72,30 @@ namespace tphrase {
     }
 
     Generator::Generator(const Syntax &syntax)
-        : pimpl{new Impl}
+        : Generator{syntax, default_start_condition}
     {
-        pimpl->data.add(syntax.get_syntax_data(), pimpl->err_msg);
     }
 
     Generator::Generator(Syntax &&syntax)
+        : Generator{std::move(syntax), default_start_condition}
+    {
+    }
+
+    Generator::Generator(const Syntax &syntax,
+                         const std::string &start_condition)
+        : pimpl{new Impl}
+    {
+        pimpl->data.add(syntax.get_syntax_data(),
+                        start_condition,
+                        pimpl->err_msg);
+    }
+
+    Generator::Generator(Syntax &&syntax, const std::string &start_condition)
         : pimpl{new Impl{syntax.move_error_message()}}
     {
-        pimpl->data.add(syntax.move_syntax_data(), pimpl->err_msg);
+        pimpl->data.add(syntax.move_syntax_data(),
+                        start_condition,
+                        pimpl->err_msg);
     }
 
     Generator::Generator(const Generator &a)
@@ -124,17 +142,32 @@ namespace tphrase {
 
     bool Generator::add(const Syntax &syntax)
     {
-        if (!pimpl->data.add(syntax.get_syntax_data(), pimpl->err_msg)) {
+        return add(syntax, default_start_condition);
+    }
+
+    bool Generator::add(Syntax &&syntax)
+    {
+        return add(std::move(syntax), default_start_condition);
+    }
+
+    bool Generator::add(const Syntax &syntax,
+                        const std::string &start_condition)
+    {
+        if (!pimpl->data.add(syntax.get_syntax_data(),
+                             start_condition,
+                             pimpl->err_msg)) {
             return false;
         }
         return true;
     }
 
-    bool Generator::add(Syntax &&syntax)
+    bool Generator::add(Syntax &&syntax, const std::string &start_condition)
     {
         const std::size_t prev_len{pimpl->err_msg.size()};
         pimpl->err_msg += syntax.get_error_message();
-        if (!pimpl->data.add(syntax.move_syntax_data(), pimpl->err_msg)) {
+        if (!pimpl->data.add(syntax.move_syntax_data(),
+                             start_condition,
+                             pimpl->err_msg)) {
             return false;
         }
         return prev_len == pimpl->err_msg.size();

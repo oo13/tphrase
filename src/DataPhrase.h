@@ -65,20 +65,22 @@ namespace tphrase {
 
         /** Add a phrase syntax.
             \param [in] syntax The phrase syntax to be copied and added.
+            \param [in] start_condition The name of the nonterminal where is the start condition.
             \param [inout] err_msg The error messages are added if some errors are detected.
             \return true if no errors are detected.
-            \note Only the phrase syntax that contains the nonterminal "main" can add.
+            \note Only the phrase syntax that contains the start condition can add.
             \note The recursive reference to a nonterminal is not allowed.
         */
-        bool add(const DataSyntax &syntax, std::string &err_msg);
+        bool add(const DataSyntax &syntax, const std::string &start_condition, std::string &err_msg);
         /** Add a phrase syntax.
             \param [inout] syntax The phrase syntax to be added. (moved)
+            \param [in] start_condition The name of the nonterminal where is the start condition.
             \param [inout] err_msg The error messages are added if some errors are detected.
             \return true if no errors are detected.
-            \note Only the phrase syntax that contains the nonterminal "main" can add.
+            \note Only the phrase syntax that contains the start condition can add.
             \note The recursive reference to a nonterminal is not allowed.
         */
-        bool add(DataSyntax &&syntax, std::string &err_msg);
+        bool add(DataSyntax &&syntax, const std::string &start_condition, std::string &err_msg);
 
         /** Clear the syntaxes and the error messages. */
         void clear();

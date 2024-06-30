@@ -166,7 +166,7 @@ The phrase syntax is expressed by the 8bit plain text that UTF-8 can pass throug
 
 The phrase syntax consists of assignments. The order of the assignments doesn't affect the generated text. The recursive reference is not allowed.
 
-It needs a definition of the nonterminal "main" as the start condition to generate the phrase.
+It needs a definition of the nonterminal where is the start condition to generate the phrase. It's "main" by default, and C++ coders can change it.
 
 ## Spaces
 The spaces can consist of ' ' SPACE, '\\t' TAB, and the comment blocks "{* ... }".

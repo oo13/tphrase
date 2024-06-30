@@ -27,11 +27,6 @@
 #include "random.h"
 #include "select_and_generate.h"
 
-namespace {
-    /** A common error message. */
-    const std::string err_msg_main{"The nonterminal \"main\" doesn't exist.\n"};
-}
-
 namespace tphrase {
     DataPhrase::DataPhrase()
         : syntaxes{}, weights{}, equalized_chance{false}
@@ -43,15 +38,12 @@ namespace tphrase {
         return select_and_generate(syntaxes, weights, equalized_chance, ext_context);
     }
 
-    bool DataPhrase::add(const DataSyntax &syntax, std::string &err_msg)
+    bool DataPhrase::add(const DataSyntax &syntax,
+                         const std::string &start_condition,
+                         std::string &err_msg)
     {
-        if (!syntax.has_main()) {
-            err_msg += err_msg_main;
-            return false;
-        }
-
         DataSyntax add_syntax{syntax};
-        add_syntax.bind_syntax(err_msg);
+        add_syntax.bind_syntax(start_condition, err_msg);
         if (!add_syntax.is_valid()) {
             return false;
         }
@@ -62,14 +54,11 @@ namespace tphrase {
         return true;
     }
 
-    bool DataPhrase::add(DataSyntax &&syntax, std::string &err_msg)
+    bool DataPhrase::add(DataSyntax &&syntax,
+                         const std::string &start_condition,
+                         std::string &err_msg)
     {
-        if (!syntax.has_main()) {
-            err_msg += err_msg_main;
-            return false;
-        }
-
-        syntax.bind_syntax(err_msg);
+        syntax.bind_syntax(start_condition, err_msg);
         if (!syntax.is_valid()) {
             return false;
         }

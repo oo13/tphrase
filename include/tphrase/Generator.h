@@ -59,6 +59,25 @@ namespace tphrase {
             \note An empty generator is created if some errors are detected.
         */
         explicit Generator(Syntax &&syntax);
+        /** The constructor to create an instance that has a syntax.
+            \param [in] syntax The phrase syntax.
+            \param [in] start_condition The name of the nonterminal where is the start condition.
+            \note Only the phrase syntax that contains the start condition can add.
+            \note The recursive reference to a nonterminal is not allowed.
+            \note get_error_message() will return an empty string if no errors are detected.
+            \note An empty generator is created if some errors are detected.
+        */
+        Generator(const Syntax &syntax, const std::string &start_condition);
+        /** The constructor to create an instance that has a syntax.
+            \param [inout] syntax The phrase syntax. (moved)
+            \param [in] start_condition The name of the nonterminal where is the start condition.
+            \note Only the phrase syntax that contains the start condition can add.
+            \note The recursive reference to a nonterminal is not allowed.
+            \note All the errors in syntax is moved.
+            \note get_error_message() will return an empty string if no errors are detected and moved.
+            \note An empty generator is created if some errors are detected.
+        */
+        Generator(Syntax &&syntax, const std::string &start_condition);
         /** The copy constructor.
             \param [in] a The source.
         */
@@ -98,7 +117,7 @@ namespace tphrase {
         /** Add a phrase syntax.
             \param [in] syntax The phrase syntax to be copied and added.
             \return true if no errors are detected.
-            \note Only the phrase syntax that contains the nonterminal "main" can add.
+            \note Only the phrase syntax that contains the nonterminal "main" can be added.
             \note The recursive reference to a nonterminal is not allowed.
             \note No phrase syntax is added if some errors are detected.
         */
@@ -106,12 +125,31 @@ namespace tphrase {
         /** Add a phrase syntax.
             \param [inout] syntax The phrase syntax to be added. (moved)
             \return true if no errors are detected and added.
-            \note Only the phrase syntax that contains the nonterminal "main" can add.
+            \note Only the phrase syntax that contains the nonterminal "main" can be added.
             \note The recursive reference to a nonterminal is not allowed.
             \note All the errors in syntax is added.
             \note No phrase syntax is added if some errors are detected.
         */
         bool add(Syntax &&syntax);
+        /** Add a phrase syntax.
+            \param [in] syntax The phrase syntax to be copied and added.
+            \param [in] start_condition The name of the nonterminal where is the start condition.
+            \return true if no errors are detected.
+            \note Only the phrase syntax that contains the start condition can be added.
+            \note The recursive reference to a nonterminal is not allowed.
+            \note No phrase syntax is added if some errors are detected.
+        */
+        bool add(const Syntax &syntax, const std::string &start_condition);
+        /** Add a phrase syntax.
+            \param [inout] syntax The phrase syntax to be added. (moved)
+            \param [in] start_condition The name of the nonterminal where is the start condition.
+            \return true if no errors are detected and added.
+            \note Only the phrase syntax that contains the start condition can be added.
+            \note The recursive reference to a nonterminal is not allowed.
+            \note All the errors in syntax is added.
+            \note No phrase syntax is added if some errors are detected.
+        */
+        bool add(Syntax &&syntax, const std::string &start_condition);
 
         /** Get the error messages.
             \return The error messages that have been generated after creating the instance or clearing the previous error messages.
@@ -179,8 +217,6 @@ namespace tphrase {
     /** The phrase syntax class
 
         The phrase syntax consists of assignments that define a nonterminal assigned to a production rule.
-
-        Only the instance of Syntax that contains the nonterminal "main" can add into an instance of Generator.
     */
     class Syntax {
         friend class Generator;
