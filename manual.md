@@ -254,7 +254,7 @@ A gsub specification follows "~", the first character except spaces means the se
 
 For example:
 ```
-~ /A B/C D/g ~ !/!|!11 ~ $X Y$1 2$
+~ /A B/C D/g ~ !/!|!g ~ $X Y$1 2$
 ```
 
 The pattern parameter succeeds the first separator in the specification and can have any characters except the separator, but the pattern must not be the empty string.
