@@ -23,6 +23,7 @@
 
 #include <limits>
 #include <stdexcept>
+#include <utility>
 
 #include "DataSyntax.h"
 
@@ -50,8 +51,7 @@ namespace {
 namespace tphrase {
     DataSyntax::DataSyntax()
         : assignments{},
-          last_start_condition{},
-          start_rule{nullptr},
+          start_it{assignments.end()},
           is_bound{false},
           binding_epoch{0}
     {
@@ -59,27 +59,25 @@ namespace tphrase {
 
     DataSyntax::DataSyntax(const DataSyntax &a)
         : assignments{a.assignments},
-          last_start_condition{a.last_start_condition},
-          start_rule{nullptr},
+          start_it{assignments.end()},
           is_bound{false},
           binding_epoch{0}
     {
         if (a.is_bound) {
             std::string err_msg;
-            bind_syntax(last_start_condition, err_msg); // It should not generate any error messages.
+            bind_syntax(a.start_it->first, err_msg); // It should not generate any error messages.
         }
     }
 
     DataSyntax &DataSyntax::operator=(const DataSyntax &a)
     {
         assignments = a.assignments;
-        last_start_condition = a.last_start_condition;
-        start_rule = nullptr;
+        start_it = assignments.end();
         is_bound = false;
         binding_epoch = 0;
         if (a.is_bound) {
             std::string err_msg;
-            bind_syntax(last_start_condition, err_msg); // It should not generate any error messages.
+            bind_syntax(a.start_it->first, err_msg); // It should not generate any error messages.
         }
         return *this;
     }
@@ -87,7 +85,7 @@ namespace tphrase {
     std::string DataSyntax::generate(const ExtContext_t &ext_context) const
     {
         if (is_valid()) {
-            return start_rule->generate(ext_context);
+            return start_it->second.generate(ext_context);
         } else {
             return "nil";
         }
@@ -96,7 +94,7 @@ namespace tphrase {
     double DataSyntax::get_weight() const
     {
         if (is_valid()) {
-            return start_rule->get_weight();
+            return start_it->second.get_weight();
         } else {
             return 0.0;
         }
@@ -105,7 +103,7 @@ namespace tphrase {
     std::size_t DataSyntax::get_combination_number() const
     {
         if (is_valid()) {
-            return start_rule->get_combination_number();
+            return start_it->second.get_combination_number();
         } else {
             return 0;
         }
@@ -151,12 +149,12 @@ namespace tphrase {
         bool rule_changed{false};
         auto it = assignments.find(start_condition);
         if (it != assignments.end()) {
-            if (start_rule != &it->second) {
-                start_rule = &it->second;
+            if (start_it != it) {
+                start_it = it;
                 rule_changed = true;
             }
         } else {
-            start_rule = nullptr;
+            start_it = assignments.end();
             is_bound = false;
             err_msg += "The nonterminal \"";
             err_msg += start_condition;
@@ -172,14 +170,13 @@ namespace tphrase {
             if (rule_changed) {
                 // Reset the epoch.
                 std::string waste_err_msg;
-                start_rule->bind_syntax(*this, binding_epoch, waste_err_msg);
+                start_it->second.bind_syntax(*this, binding_epoch, waste_err_msg);
                 binding_epoch = 2;
             }
         }
         const std::size_t prev_len{err_msg.size()};
-        start_rule->bind_syntax(*this, binding_epoch, err_msg);
+        start_it->second.bind_syntax(*this, binding_epoch, err_msg);
         is_bound = err_msg.size() == prev_len;
-        last_start_condition = start_condition;
         return is_bound;
     }
 
@@ -200,8 +197,7 @@ namespace tphrase {
     void DataSyntax::clear()
     {
         assignments.clear();
-        last_start_condition.clear();
-        start_rule = nullptr;
+        start_it = assignments.end();
         is_bound = false;
         binding_epoch = 0;
     }

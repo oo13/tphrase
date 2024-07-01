@@ -27,7 +27,6 @@
 #include <cstddef>
 #include <unordered_map>
 #include <string>
-#include <utility>
 
 #include "tphrase/common/ext_context.h"
 #include "DataProductionRule.h"
@@ -132,8 +131,7 @@ namespace tphrase {
 
     private:
         std::unordered_map<std::string, DataProductionRule> assignments; /**< The assignments in the syntax. */
-        std::string last_start_condition; /**< The nonterminal where is the start condition used by the last binding. */
-        DataProductionRule *start_rule; /**< The pointer to the production rule assigned to the start condition. */
+        decltype(assignments)::iterator start_it; /**< The iterator for the start condition. */
         bool is_bound; /**< The instance is successfully bound. */
         int binding_epoch; /**< The binding epoch. */
     };
