@@ -109,6 +109,9 @@ namespace tphrase {
         void fix_local_nonterminal(DataSyntax &syntax,
                                    std::string &err_msg);
 
+        /** Reset the binding epoch. */
+        void reset_binding_epoch();
+
     private:
         DataOptions options; /**< The options in the production rule. */
         DataGsubs gsubs; /**< The gsubs in the production rule. */

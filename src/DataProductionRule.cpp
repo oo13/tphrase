@@ -72,4 +72,9 @@ namespace tphrase {
         binding_epoch = epoch;
         return true;
     }
+
+    void DataProductionRule::reset_binding_epoch()
+    {
+        binding_epoch = 0;
+    }
 }

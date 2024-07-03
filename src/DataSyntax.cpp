@@ -146,13 +146,9 @@ namespace tphrase {
 
     bool DataSyntax::bind_syntax(const std::string &start_condition, std::string &err_msg)
     {
-        bool rule_changed{false};
         auto it = assignments.find(start_condition);
         if (it != assignments.end()) {
-            if (start_it != it) {
-                start_it = it;
-                rule_changed = true;
-            }
+            start_it = it;
         } else {
             start_it = assignments.end();
             is_bound = false;
@@ -165,14 +161,10 @@ namespace tphrase {
         ++binding_epoch;
         // It's generally 0 or 1 because the functions of class Syntax and Generator don't call bind_syntax() to the syntax that already bound. (The three variations (initial, current, not current) are enough to distinguish the binding epoch unless start_condition is changed.)
         if (binding_epoch == std::numeric_limits<int>::max()) {
-            binding_epoch = 1;
-
-            if (rule_changed) {
-                // Reset the epoch.
-                std::string waste_err_msg;
-                start_it->second.bind_syntax(*this, binding_epoch, waste_err_msg);
-                binding_epoch = 2;
+            for (auto it : assignments) {
+                it.second.reset_binding_epoch();
             }
+            binding_epoch = 1;
         }
         const std::size_t prev_len{err_msg.size()};
         start_it->second.bind_syntax(*this, binding_epoch, err_msg);
