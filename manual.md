@@ -204,7 +204,7 @@ A22 = 5 | 6 | 7 | 8 | 9
 ```
 The chance to select {A21} is 35%, {A22} is 35%. {A1} and {A2} aren't affected by ":=". (cf. The weight propagates the higher layers.)
 
-A weight of a nontermial can be specified between the nonterminal and the assignment operator. For example:
+A weight of a nonterminal can be specified between the nonterminal and the assignment operator. For example:
 ```
 SUB 1 = {A} | {B}
 ```
@@ -212,7 +212,7 @@ It's equivalent to this:
 ```
 SUB = "{A}" 0.5 | "{B}" 0.5
 ```
-The weight of the nontermial is the sum of the weight of the options in the production rule by default.
+The weight of the nonterminal is the sum of the weight of the options in the production rule by default.
 
 ## Production rule
 
