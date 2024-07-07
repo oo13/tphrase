@@ -476,5 +476,28 @@ std::size_t test_generate()
             && ph2.get_error_message().empty();
     });
 
+    ut.set_test("Nonterminal with weight", [&]() {
+        tphrase::Generator ph(R"(
+            main 1 = A | B | C | D | E
+        )");
+        ph.add(R"(
+            main 1 = 1
+        )");
+        tphrase::Generator::set_random_function(get_default_random_func());
+        const bool good = check_distribution(ph, 100000, {
+                { "A", 0.1 },
+                { "B", 0.1 },
+                { "C", 0.1 },
+                { "D", 0.1 },
+                { "E", 0.1 },
+                { "1", 0.5 },
+            }, 0.01);
+        return good
+            && ph.get_error_message().empty()
+            && ph.get_combination_number() == 6
+            && ph.get_weight() == 2
+            && ph.get_number_of_syntax() == 2;
+    });
+
     return ut.run();
 }

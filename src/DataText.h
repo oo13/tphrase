@@ -102,8 +102,8 @@ namespace tphrase {
         void add_anonymous_rule(DataProductionRule &&r);
 
         /** Set the weight of the text manually.
-            \param [in] w The weight.
-            \note It disable the automatic calculation of the weight.
+            \param [in] w The weight. The default value is used if weight is NaN.
+            \note It disable the automatic calculation of the weight if w is not NaN.
         */
         void set_weight(double w);
 

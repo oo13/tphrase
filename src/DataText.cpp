@@ -22,6 +22,7 @@
 */
 
 #include <cassert>
+#include <cmath>
 #include <stdexcept>
 #include <utility>
 
@@ -156,8 +157,12 @@ namespace tphrase {
 
     void DataText::set_weight(double w)
     {
-        weight_by_user = true;
-        weight = w;
+        if (std::isnan(w)) {
+            weight_by_user = false;
+        } else {
+            weight_by_user = true;
+            weight = w;
+        }
     }
 
     void

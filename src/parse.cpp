@@ -21,6 +21,7 @@
     \endparblock
 */
 
+#include <limits>
 #include <locale>
 #include <stdexcept>
 #include <string>
@@ -176,11 +177,12 @@ namespace {
     */
     bool is_nonterminal_char(const char c)
     {
-        return std::isalnum(c, std::locale::classic()) || c == '_';
+        return std::isalnum(c, std::locale::classic()) || c == '_' || c == '.';
     }
 
     // Forward declarations
     std::string parse_nonterminal(CharFeeder &it);
+    double parse_weight(CharFeeder &it);
     char parse_operator(CharFeeder &it);
     DataProductionRule parse_production_rule(CharFeeder &it, char term_char = '\0');
 
@@ -189,15 +191,18 @@ namespace {
         \param [inout] syntax The syntax into which the assignment is added.
     */
     /*
-      assignment = nonterminal, space_opt, operator, space_one_nl_opt, production_rule, ( nl | $ ) ;
+      assignment = nonterminal, space_opt, [ weight, space_opt ], operator, space_one_nl_opt, production_rule, ( nl | $ ) ; (* One of spaces before weight is necessary because nonterminal consumes the numeric character and the period. *)
     */
     void parse_assignment(CharFeeder &it, DataSyntax &syntax)
     {
         std::string nonterminal{parse_nonterminal(it)};
         skip_space(it);
+        const double weight = parse_weight(it);
+        skip_space(it);
         const char op_type{parse_operator(it)};
         skip_space_one_nl(it);
         DataProductionRule rule{parse_production_rule(it)};
+        rule.set_weight(weight);
         if (it.is_end() || it.getc() == '\n') {
             if (op_type == ':') {
                 rule.equalize_chance(true);
@@ -213,7 +218,7 @@ namespace {
         \return The nonterminal.
     */
     /*
-      nonterminal = { ? [A-Za-z0-9_] ? } ;
+      nonterminal = { ? [A-Za-z0-9_.] ? } ;
     */
     std::string parse_nonterminal(CharFeeder &it)
     {
@@ -228,9 +233,62 @@ namespace {
             }
         }
         if (nonterminal.empty()) {
-            throw_parse_error(it, "A nonterminal \"[A-Za-z0-9_]+\" is expected.");
+            throw_parse_error(it, "A nonterminal \"[A-Za-z0-9_.]+\" is expected.");
         }
         return nonterminal;
+    }
+
+    /** Is it a character of the decimal number?
+        \param [in] c The character to be tested.
+        \return It's a decimal number.
+     */
+    bool is_decimal_number_char(const char c)
+    {
+        return '0' <= c && c <= '9';
+    }
+
+    /** Parse a weight number.
+        \param [inout] it The character feeder.
+        \return weight number if weight is specified, or NaN.
+    */
+    /*
+      weight = ( ( { ? [0-9] ? }, [ "." ] ) | ( ".", ? [0-9] ? ) ), [ { ? [0-9] ? } ] ;
+    */
+    double parse_weight(CharFeeder &it)
+    {
+        std::string s;
+        char c{it.getc()};
+        if (c == '.') {
+            it.next();
+            c = it.getc();
+            if (is_decimal_number_char(c)) {
+                s += '.';
+                s += c;
+                it.next();
+                c = it.getc();
+            } else {
+                throw_parse_error(it, "A number is expected. (\".\" is not a number.)");
+            }
+        } else if (is_decimal_number_char(c)) {
+            do {
+                s += c;
+                it.next();
+                c = it.getc();
+            } while (is_decimal_number_char(c));
+            if (c == '.') {
+                s += c;
+                it.next();
+                c = it.getc();
+            }
+        } else {
+            return std::numeric_limits<double>::quiet_NaN();
+        }
+        while (is_decimal_number_char(c)) {
+            s += c;
+            it.next();
+            c = it.getc();
+        }
+        return std::stod(s);
     }
 
     /** Parse an operator.
@@ -352,9 +410,6 @@ namespace {
         }
     }
 
-    // Forward declaration
-    void parse_weight(CharFeeder &it, DataText &text);
-
     /** Parse a quoted text.
         \param [inout] it The character feeder.
         \return The text.
@@ -392,7 +447,7 @@ namespace {
         }
         it.next();
         skip_space(it);
-        parse_weight(it, text);
+        text.set_weight(parse_weight(it));
         return text;
     }
 
@@ -529,59 +584,6 @@ namespace {
             }
         }
         throw_parse_error(it, "The end of the brace expansion is expected.");
-    }
-
-    /** Is it a character of the decimal number?
-        \param [in] c The character to be tested.
-        \return It's a decimal number.
-     */
-    bool is_decimal_number_char(const char c)
-    {
-        return '0' <= c && c <= '9';
-    }
-
-    /** Parse a weight number.
-        \param [inout] it The character feeder.
-        \param [inout] text The text into which the weight is set.
-    */
-    /*
-      weight = ( ( { ? [0-9] ? }, [ "." ] ) | ( ".", ? [0-9] ? ) ), [ { ? [0-9] ? } ] ;
-    */
-    void parse_weight(CharFeeder &it, DataText &text)
-    {
-        std::string s;
-        char c{it.getc()};
-        if (c == '.') {
-            it.next();
-            c = it.getc();
-            if (is_decimal_number_char(c)) {
-                s += '.';
-                s += c;
-                it.next();
-                c = it.getc();
-            } else {
-                throw_parse_error(it, "A number is expected. (\".\" is not a number.)");
-            }
-        } else if (is_decimal_number_char(c)) {
-            do {
-                s += c;
-                it.next();
-                c = it.getc();
-            } while (is_decimal_number_char(c));
-            if (c == '.') {
-                s += c;
-                it.next();
-                c = it.getc();
-            }
-        } else {
-            return;
-        }
-        while (is_decimal_number_char(c)) {
-            s += c;
-            it.next();
-            c = it.getc();
-        }
-        text.set_weight(std::stod(s));
     }
 
     // Forward declarations

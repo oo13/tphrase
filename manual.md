@@ -178,6 +178,8 @@ The assignment defines a nonterminal assigned to a production rule.
 
 `nonterminal = production_rule` or `nonterminal := production_rule`
 
+ The nonterminal can consist the alphabet, numeric, period, and low line characters ("[A-Za-z0-9_.]"). The nonterminal starts with "_" is a local nonterminal that is visible only from the same compile unit.
+
 The assignments must be separated by one newline at least. The last assignment doesn't need a following newline. There can be any number of the spaces and newlines between the assignments.
 
 The assignment operator ":=" means the production rule equalizes the chance to select each text. "=" means the chance depends on the number of the possible texts to generate and the weight set by user.
@@ -202,7 +204,15 @@ A22 = 5 | 6 | 7 | 8 | 9
 ```
 The chance to select {A21} is 35%, {A22} is 35%. {A1} and {A2} aren't affected by ":=". (cf. The weight propagates the higher layers.)
 
-The nonterminal starts with "_" is a local nonterminal that is visible only from the same compile unit.
+A weight of a nontermial can be specified between the nonterminal and the assignment operator. For example:
+```
+SUB 1 = {A} | {B}
+```
+It's equivalent to this:
+```
+SUB = "{A}" 0.5 | "{B}" 0.5
+```
+The weight of the nontermial is the sum of the weight of the options in the production rule by default.
 
 ## Production rule
 
@@ -214,7 +224,7 @@ The options are texts separated "|". For example: `text1 | text2 | text3`
 ## Text
 The text is the candidate for the result of the production rule.
 
-If a text enclose quotation ('"', "'", or "`"), the text can have any character except the quotation. If it's followed by a number, the number is the weight of the chance to select the text. There can be the spaces between the quoted text and the weight number.
+If a text enclose quotation ('"', "'", or "`"), the text can have any character except the quotation. If it's followed by a number, the number is the weight of the chance to select the text. There can be the spaces between the quoted text and the weight number. By default, the weight of the text is the product of the weight of the expansions in the text. (The weight of the string except the expansion is one.)
 
 ```
 A = text1 | "text2" 2
@@ -237,7 +247,7 @@ The text doesn't need to enclose quotations ('"', "'", or "`") if it meets these
 The text may have expansions, which is a string enclosed by "{" and "}". The text can contain "{" only as the beginning of the expansion, and the expansion can include any character except "}". The rule is prior to the above rules, for example &quot; {&quot;} &quot; is a valid text.
 
 ## Expansion
-The string enclosed by "{" and "}" is the expansion, which will be expanded into a text. "{" and "}" can enclose any character except "}". If the string enclosed "{" and "}" has only alphabet, numeric, and low line characters ("[A-Za-z0-9_]"), the enclosed string is a nonterminal. The nonterminal starts with "_" is a local nonterminal.
+The string enclosed by "{" and "}" is the expansion, which will be expanded into a text. "{" and "}" can enclose any character except "}". If the string enclosed "{" and "}" has only alphabet, numeric, period, and low line characters ("[A-Za-z0-9_.]"), the enclosed string is a nonterminal. The nonterminal starts with "_" is a local nonterminal.
 
 1. If the nonterminal is assigned to a production rule, the expansion will be expanded in the generated text.
 1. The local unsolved nonterminal occurs an error.
@@ -273,8 +283,9 @@ space = " " | "\t" | ( "{*", [ { ? [^}] ? } ], "}" ) ;
 nl = "\n" ;
 space_nl_opt = [ { space | nl } ] ;
 
-assignment = nonterminal, space_opt, operator, space_one_nl_opt, production_rule, ( nl | $ ) ;
-nonterminal = { ? [A-Za-z0-9_] ? } ;
+assignment = nonterminal, space_opt, [ weight, space_opt ], operator, space_one_nl_opt, production_rule, ( nl | $ ) ; (* One of spaces before weight is necessary because nonterminal consumes the numeric character and the period. *)
+nonterminal = { ? [A-Za-z0-9_.] ? } ;
+weight = ( ( { ? [0-9] ? }, [ "." ] ) | ( ".", ? [0-9] ? ) ), [ { ? [0-9] ? } ] ;
 operator = "=" | ":=" ;
 space_opt = [ { space } ] ;
 space_one_nl_opt = space_opt, [ nl, space_opt ] ;
@@ -290,7 +301,6 @@ text_begin = ? [^ \t\n"'`|~{}] ? | expansion ; (* "}" is the next to the text wh
 text_body = { ? [^\n|~{}] ? | expansion } ;
 text_postfix = ? space_opt(?=($|[\n|~}])) ? ; (* text_postfix greedily matches with space_opt preceding the end of the text, newline, "|", "~", or "}", but it consumes only space_opt. *)
 expansion = "{", [ { ? [^}] ? } ], "}" ;
-weight = ( ( { ? [0-9] ? }, [ "." ] ) | ( ".", ? [0-9] ? ) ), [ { ? [0-9] ? } ] ;
 
 gsubs = [ { "~", space_one_nl_opt, sep, { pat }, sep2, [ { pat } ], sep2, [ "g" ], space_opt } ] ; (* 'sep2' is the same character of 'sep'. *)
 sep = ? 7 bit character - [ \t\n{] ? ; (* '{' may be the beginning of the comment block. *)

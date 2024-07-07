@@ -405,5 +405,38 @@ Hello World.)");
         return r == "nil" && err_msg.find("The local nonterminal \"_B\" is not found.") != err_msg.npos;
     });
 
+    ut.set_test("Nonterminal with weight#1", [&]() {
+        tphrase::Generator ph;
+        ph.add(R"(
+            main 10 = A | B | C
+        )");
+        const auto r = ph.generate();
+        return r == "A"
+            && ph.get_weight() == 10
+            && ph.get_error_message().empty();
+    });
+
+    ut.set_test("Nonterminal with weight#2", [&]() {
+        tphrase::Generator ph;
+        ph.add(R"(
+            main 10.5= A | B | C
+        )");
+        const auto r = ph.generate();
+        return r == "A"
+            && ph.get_weight() == 10.5
+            && ph.get_error_message().empty();
+    });
+
+    ut.set_test("Nonterminal characters", [&]() {
+        tphrase::Generator ph;
+        ph.add(R"(
+            main = {0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_.}
+            0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_. = 9
+        )");
+        const auto r = ph.generate();
+        return r == "9"
+            && ph.get_error_message().empty();
+    });
+
     return ut.run();
 }

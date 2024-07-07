@@ -84,6 +84,11 @@ namespace tphrase {
         */
         std::size_t get_combination_number() const;
 
+        /** Set the weight of the production rule.
+            \param [in] weight The weight of the production rule. The default value is used if weight is NaN.
+            \note The default weight is the value propagated from the options.
+        */
+        void set_weight(double weight);
         /** Equalize the chance to select each text.
             \param [in] enable equalized if enable is true. If not, the chance depends on the weight of the text. (Default)
         */
@@ -116,13 +121,8 @@ namespace tphrase {
         DataOptions options; /**< The options in the production rule. */
         DataGsubs gsubs; /**< The gsubs in the production rule. */
         int binding_epoch; /**< The binding epoch. */
+        double weight; /**< The weight specified by the phrase syntax. */
     };
-
-    inline
-    double DataProductionRule::get_weight() const
-    {
-        return options.get_weight();
-    }
 
     inline
     std::size_t DataProductionRule::get_combination_number() const

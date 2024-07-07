@@ -21,6 +21,8 @@
     \endparblock
 */
 
+#include <cmath>
+#include <limits>
 #include <utility>
 
 #include "DataProductionRule.h"
@@ -30,14 +32,16 @@ namespace tphrase {
     DataProductionRule::DataProductionRule(const DataProductionRule &a)
         : options{a.options},
           gsubs{a.gsubs},
-          binding_epoch{0}
+          binding_epoch{0},
+          weight{std::numeric_limits<double>::quiet_NaN()}
     {
     }
 
     DataProductionRule::DataProductionRule(DataOptions &&in_options, DataGsubs &&in_gsubs)
         : options{std::move(in_options)},
           gsubs{std::move(in_gsubs)},
-          binding_epoch{0}
+          binding_epoch{0},
+          weight{std::numeric_limits<double>::quiet_NaN()}
     {
     }
 
@@ -46,12 +50,27 @@ namespace tphrase {
         options = a.options;
         gsubs = a.gsubs;
         binding_epoch = 0;
+        weight = a.weight;
         return *this;
     }
 
     std::string DataProductionRule::generate(const ExtContext_t &ext_context) const
     {
         return gsubs.gsub(options.generate(ext_context));
+    }
+
+    double DataProductionRule::get_weight() const
+    {
+        if (std::isnan(weight)) {
+            return options.get_weight();
+        } else {
+            return weight;
+        }
+    }
+
+    void DataProductionRule::set_weight(double w)
+    {
+        weight = w;
     }
 
     bool
