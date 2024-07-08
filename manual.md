@@ -164,7 +164,7 @@ It can use to create a common library with some assignments, but the number of t
 ## Overview
 The phrase syntax is expressed by the 8bit plain text that UTF-8 can pass through. It may be problematic for gsub function, so the C++ coders may replace it by a gsub function that supports UTF-8, such as a function using [SRELL](https://www.akenotsuki.com/misc/srell/en/). (The unit of the column number in the error message is byte. TPhrase user cannot change it.)
 
-The phrase syntax consists of assignments. The order of the assignments doesn't affect the generated text. The recursive reference is not allowed.
+The phrase syntax consists of assignments. The order of the assignments doesn't affect the generated text. The recursive reference is not allowed. The multiple definition for a nonterminal occurs an error.
 
 It needs a definition of the nonterminal where is the start condition to generate the phrase. It's "main" by default, and C++ coders can change it.
 

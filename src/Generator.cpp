@@ -46,6 +46,10 @@ namespace tphrase {
 
         /** The default constructor. */
         Impl() = default;
+        /** The constructor to copy error messages.
+            \param [in] err The error messages.
+        */
+        Impl(const std::string &err);
         /** The constructor to move error messages.
             \param [inout] err The error messages. (moved)
         */
@@ -60,6 +64,11 @@ namespace tphrase {
         */
         Impl &operator=(const Impl &a) = default;
     };
+
+    Generator::Impl::Impl(const std::string &err)
+        : err_msg{err}, data{}
+    {
+    }
 
     Generator::Impl::Impl(std::string &&err)
         : err_msg{std::move(err)}, data{}
@@ -83,7 +92,7 @@ namespace tphrase {
 
     Generator::Generator(const Syntax &syntax,
                          const std::string &start_condition)
-        : pimpl{new Impl}
+        : pimpl{new Impl{syntax.get_error_message()}}
     {
         pimpl->data.add(syntax.get_syntax_data(),
                         start_condition,
@@ -153,12 +162,14 @@ namespace tphrase {
     bool Generator::add(const Syntax &syntax,
                         const std::string &start_condition)
     {
+        const std::size_t prev_len{pimpl->err_msg.size()};
+        pimpl->err_msg += syntax.get_error_message();
         if (!pimpl->data.add(syntax.get_syntax_data(),
                              start_condition,
                              pimpl->err_msg)) {
             return false;
         }
-        return true;
+        return prev_len == pimpl->err_msg.size();
     }
 
     bool Generator::add(Syntax &&syntax, const std::string &start_condition)

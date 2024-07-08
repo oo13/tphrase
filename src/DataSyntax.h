@@ -101,14 +101,19 @@ namespace tphrase {
         /** Add a pair of a nonterminal and a production rule.
             \param [inout] nonterminal The nonterminal. (moved)
             \param [inout] rule The production rule to be assigned to the nonterminal. (moved)
+            \param [inout] err_msg The error message is added if an error is detected.
+            \return true if no errors are detected.
             \note It has a side effect to make the instance the unbound state (although the object that was bound on this remains bound on it).
+            \note If this already contains nonterminal, then: (1) nonterminal and rule do NOT add to this, (2) an error message is added to err_msg, (3) false is returned.
         */
-        void add(std::string &&nonterminal, DataProductionRule &&rule);
+        bool add(std::string &&nonterminal, DataProductionRule &&rule, std::string &err_msg);
         /** Add a set of the assignments.
             \param [inout] syntax The syntax with the assignments to be added. (moved)
+            \param [inout] err_msg The error messages are added if some errors are detected.
             \note It has a side effect to make the instance the unbound state (although the object that was bound on this remains bound on it).
+            \note If syntax has the nonterminal that this already contains, then: (1) the nonterminal in syntax overwrites it, (2) an error message is added to err_msg.
         */
-        void add(DataSyntax &&syntax);
+        void add(DataSyntax &&syntax, std::string &err_msg);
 
         /** Try to bind the expansions on the nonterminals in this.
             \param [in] start_condition The nonterminal where is the start condition.

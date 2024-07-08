@@ -46,6 +46,7 @@ namespace tphrase {
             \param [in] syntax The phrase syntax.
             \note Only the phrase syntax that contains the nonterminal "main" can add.
             \note The recursive reference to a nonterminal is not allowed.
+            \note All the errors in syntax is added.
             \note get_error_message() will return an empty string if no errors are detected.
             \note An empty generator is created if some errors are detected.
         */
@@ -64,6 +65,7 @@ namespace tphrase {
             \param [in] start_condition The name of the nonterminal where is the start condition.
             \note Only the phrase syntax that contains the start condition can add.
             \note The recursive reference to a nonterminal is not allowed.
+            \note All the errors in syntax is added.
             \note get_error_message() will return an empty string if no errors are detected.
             \note An empty generator is created if some errors are detected.
         */
@@ -116,9 +118,10 @@ namespace tphrase {
 
         /** Add a phrase syntax.
             \param [in] syntax The phrase syntax to be copied and added.
-            \return true if no errors are detected.
+            \return true if no errors are detected and added.
             \note Only the phrase syntax that contains the nonterminal "main" can be added.
             \note The recursive reference to a nonterminal is not allowed.
+            \note All the errors in syntax is added.
             \note No phrase syntax is added if some errors are detected.
         */
         bool add(const Syntax &syntax);
@@ -134,9 +137,10 @@ namespace tphrase {
         /** Add a phrase syntax.
             \param [in] syntax The phrase syntax to be copied and added.
             \param [in] start_condition The name of the nonterminal where is the start condition.
-            \return true if no errors are detected.
+            \return true if no errors are detected and added.
             \note Only the phrase syntax that contains the start condition can be added.
             \note The recursive reference to a nonterminal is not allowed.
+            \note All the errors in syntax is added.
             \note No phrase syntax is added if some errors are detected.
         */
         bool add(const Syntax &syntax, const std::string &start_condition);
@@ -274,16 +278,16 @@ namespace tphrase {
 
         /** Add the assignments from a source Syntax.
             \param [in] a The source syntax.
-            \return true if no errors are added.
-            \note The production rules for the existing nonterminals is overwritten if the source Syntax has the assignment for the same nonterminal.
-            \note The function causes no errors, but adds  the error messages in the source syntax into this.
+            \return true if no errors are added from the source syntax.
+            \note The error message in the source syntax is added to this.
+            \note If the source syntax has the nonterminal that this already contains, then: (1) the nonterminal in the source syntax overwrites it, (2) an error message is added to this, (3) true is returned unless other error is added.
         */
         bool add(const Syntax &a);
         /** Add the assignments from a source Syntax.
             \param [inout] a The source syntax. (moved)
-            \return true if no errors are added.
-            \note The production rules for the existing nonterminals is overwritten if the source Syntax has the assignment for the same nonterminal.
-            \note The function causes no errors, but adds  the error messages in the source syntax into this.
+            \return true if no errors are added from the source syntax.
+            \note The error message in the source syntax is added to this.
+            \note If the source syntax has the nonterminal that this already contains, then: (1) the nonterminal in the source syntax overwrites it, (2) an error message is added to this, (3) true is returned unless other error is added.
         */
         bool add(Syntax &&a);
         /** Add the assignments from a phrase syntax.
@@ -291,29 +295,29 @@ namespace tphrase {
             \tparam S The type of the end for T.
             \param [inout] begin The iterator to point the beginning of the source text of a phrase syntax. (Universal reference; accessed by the reference or moved)
             \param [inout] end The end iterator. (Universal reference; accessed by the reference or moved)
-            \return true if no errors are detected.
+            \return true if no parse errors are detected.
             \note The instance doesn't use begin, end, and something referred by begin after returning from the function.
-            \note The production rules for the existing nonterminals is overwritten if the source Syntax has the assignment for the same nonterminal.
             \note Some parse errors may be detected if src has errors.
-            \note No phrase syntax is added if some errors are detected.
+            \note No phrase syntax is added if some parse errors are detected.
+            \note If the source syntax has the nonterminal that this already contains, then: (1) the nonterminal in the source syntax overwrites it, (2) an error message is added to this, (3) true is returned unless some parse errors are detected.
             \attention std::istream_iterator skips any white spaces by default, so you should configure the target input stream not to skip the spaces (stream.unsetf(std::ios_base::skipws)) if you want to use an istream_iterator.
         */
         template<typename T, typename S> REQUIRES_CharInputIteratorConcept(T, S)
         bool add(T &&begin, S &&end);
         /** Add the assignments from a phrase syntax.
             \param [in] src The source text of a phrase syntax.
-            \return true if no errors are detected.
-            \note The production rules for the existing nonterminals is overwritten if the source Syntax has the assignment for the same nonterminal.
+            \return true if no parse errors are detected.
             \note Some parse errors may be detected if src has errors.
-            \note No phrase syntax is added if some errors are detected.
+            \note No phrase syntax is added if some parse errors are detected.
+            \note If the source syntax has the nonterminal that this already contains, then: (1) the nonterminal in the source syntax overwrites it, (2) an error message is added to this, (3) true is returned unless some parse errors are detected.
         */
         bool add(const std::string &src);
         /** Add the assignments from a phrase syntax.
             \param [in] src The source text of a phrase syntax.
-            \return true if no errors are detected.
-            \note The production rules for the existing nonterminals is overwritten if the source Syntax has the assignment for the same nonterminal.
+            \return true if no parse errors are detected.
             \note Some parse errors may be detected if src has errors.
-            \note No phrase syntax is added if some errors are detected.
+            \note No phrase syntax is added if some parse errors are detected.
+            \note If the source syntax has the nonterminal that this already contains, then: (1) the nonterminal in the source syntax overwrites it, (2) an error message is added to this, (3) true is returned unless some parse errors are detected.
         */
         bool add(const char *src);
 
@@ -337,9 +341,11 @@ namespace tphrase {
         Syntax(InputIteratorBase &it);
         /** Add the assignments from a phrase syntax.
             \param [inout] it InputIterator of the source text of a phrase syntax.
-            \return true if no errors are detected.
+            \return true if no parse errors are detected.
             \note The instance doesn't use 'it' and something referred by 'it' after returning from the constructor.
             \note Some parse errors may be detected if src has errors.
+            \note No phrase syntax is added if some parse errors are detected.
+            \note If the source syntax has the nonterminal that this already contains, then: (1) the nonterminal in the source syntax overwrites it, (2) an error message is added to this, (3) true is returned unless some parse errors are detected.
         */
         bool add(InputIteratorBase &it);
 

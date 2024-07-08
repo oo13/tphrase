@@ -27,27 +27,6 @@
 
 #include "DataSyntax.h"
 
-namespace {
-    /** Insert an item, but assign the item if it already exists.
-        \param [in] m The target map.
-        \param [inout] k The key. (moved)
-        \param [inout] r The value. (moved)
-        \note This function is equivalent of std::unordered_map::insert_to_assign() in C++17 or later.
-    */
-    void
-    insert_or_assign(std::unordered_map<std::string, tphrase::DataProductionRule> &m,
-                     std::string &&k,
-                     tphrase::DataProductionRule &&r)
-    {
-        auto it = m.find(k);
-        if (it == m.end()) {
-            m.emplace(std::move(k), std::move(r));
-        } else {
-            it->second = std::move(r);
-        }
-    }
-}
-
 namespace tphrase {
     DataSyntax::DataSyntax()
         : assignments{},
@@ -129,17 +108,36 @@ namespace tphrase {
         return it->second;
     }
 
-    void DataSyntax::add(std::string &&nonterminal, DataProductionRule &&rule)
+    bool DataSyntax::add(std::string &&nonterminal,
+                         DataProductionRule &&rule,
+                         std::string &err_msg)
     {
-        insert_or_assign(assignments, std::move(nonterminal), std::move(rule));
         is_bound = false;
+        auto it = assignments.find(nonterminal);
+        if (it == assignments.end()) {
+            assignments.emplace(std::move(nonterminal), std::move(rule));
+            return true;
+        } else {
+            // This is a parse error and it needs no newline.
+            err_msg += "The nonterminal \"";
+            err_msg += nonterminal;
+            err_msg += "\" is already defined.";
+            return false;
+        }
     }
 
-    void DataSyntax::add(DataSyntax &&syntax)
+    void DataSyntax::add(DataSyntax &&syntax, std::string &err_msg)
     {
         for (auto &it : syntax.assignments) {
-            std::string s{it.first};
-            insert_or_assign(assignments, std::move(s), std::move(it.second));
+            auto found = assignments.find(it.first);
+            if (found == assignments.end()) {
+                assignments.emplace(it.first, std::move(it.second));
+            } else {
+                found->second = std::move(it.second);
+                err_msg += "The nonterminal \"";
+                err_msg += it.first;
+                err_msg += "\" is already defined.\n";
+            }
         }
         is_bound = false;
     }

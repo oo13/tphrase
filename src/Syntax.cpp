@@ -129,7 +129,7 @@ namespace tphrase {
         if (!good) {
             pimpl->err_msg += a.pimpl->err_msg;
         }
-        pimpl->data.add(DataSyntax(a.pimpl->data));
+        pimpl->data.add(DataSyntax(a.pimpl->data), pimpl->err_msg);
         return good;
     }
 
@@ -139,7 +139,7 @@ namespace tphrase {
         if (!good) {
             pimpl->err_msg += a.pimpl->err_msg;
         }
-        pimpl->data.add(std::move(a.pimpl->data));
+        pimpl->data.add(std::move(a.pimpl->data), pimpl->err_msg);
         return good;
     }
 
@@ -181,7 +181,7 @@ namespace tphrase {
         DataSyntax data{parse(it, pimpl->err_msg)};
         const bool good = prev_len == pimpl->err_msg.size();
         if (good) {
-            pimpl->data.add(std::move(data));
+            pimpl->data.add(std::move(data), pimpl->err_msg);
         }
         return good;
     }

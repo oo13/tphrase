@@ -65,6 +65,7 @@ std::size_t test_class_Generator()
         auto r = ph.generate();
         return r == "nil"
             && syntax.get_error_message().find("A text is expected.") != std::string::npos
+            && ph.get_error_message().find("A text is expected.") != std::string::npos
             && ph.get_error_message().find("The nonterminal \"main\" doesn't exist.\n") != std::string::npos;
     });
 
@@ -95,6 +96,7 @@ std::size_t test_class_Generator()
         auto r = ph.generate();
         return r == "nil"
             && syntax.get_error_message().find("A text is expected.") != std::string::npos
+            && ph.get_error_message().find("A text is expected.") != std::string::npos
             && ph.get_error_message().find("The nonterminal \"main2\" doesn't exist.\n") != std::string::npos;
     });
 
@@ -307,7 +309,7 @@ std::size_t test_class_Generator()
 
             B = B1 | B2 | B3
         )"};
-        ph1.add(R"(
+        const bool add_result = ph1.add(R"(
             main = {= V | W } | {C}
 
             C = C1 | C2 | C3
@@ -357,7 +359,8 @@ std::size_t test_class_Generator()
             && ph1.get_weight() == 14
             && ph2.get_weight() == 14
             && ph1.get_combination_number() == 14
-            && ph2.get_combination_number() == 14;
+            && ph2.get_combination_number() == 14
+            && add_result;
     });
 
     ut.set_test("Copy Assignment#2", [&]() {
@@ -368,7 +371,7 @@ std::size_t test_class_Generator()
 
             B = B1 | B2 | B3
         )"};
-        ph1.add(R"(
+        const bool add_result = ph1.add(R"(
             main = {= V | W } | {C}
 
             C = C1 | C2 | C3 |
@@ -380,7 +383,8 @@ std::size_t test_class_Generator()
             && ph1.get_error_message().find("The nonterminal \"main\" doesn't exist.\n") != std::string::npos
             && ph2.get_error_message().find("The non-empty pattern is expected.") != std::string::npos
             && ph2.get_error_message().find("A text is expected.") != std::string::npos
-            && ph2.get_error_message().find("The nonterminal \"main\" doesn't exist.\n") != std::string::npos;
+            && ph2.get_error_message().find("The nonterminal \"main\" doesn't exist.\n") != std::string::npos
+            && !add_result;
     });
 
     ut.set_test("Move Assignment#1", [&]() {
@@ -391,7 +395,7 @@ std::size_t test_class_Generator()
 
             B = B1 | B2 | B3
         )"};
-        ph1.add(R"(
+        const bool add_result = ph1.add(R"(
             main = {= V | W } | {C}
 
             C = C1 | C2 | C3
@@ -420,7 +424,8 @@ std::size_t test_class_Generator()
             && ph2.get_error_message().empty()
             && ph2.get_number_of_syntax() == 2
             && ph2.get_weight() == 14
-            && ph2.get_combination_number() == 14;
+            && ph2.get_combination_number() == 14
+            && add_result;
     });
 
     ut.set_test("Move Assignment#2", [&]() {
@@ -431,7 +436,7 @@ std::size_t test_class_Generator()
 
             B = B1 | B2 | B3
         )"};
-        ph1.add(R"(
+        const bool add_result = ph1.add(R"(
             main = {= V | W } | {C}
 
             C = C1 | C2 | C3 |
@@ -440,7 +445,8 @@ std::size_t test_class_Generator()
         ph2 = std::move(ph1);
         return ph2.get_error_message().find("The non-empty pattern is expected.") != std::string::npos
             && ph2.get_error_message().find("A text is expected.") != std::string::npos
-            && ph2.get_error_message().find("The nonterminal \"main\" doesn't exist.\n") != std::string::npos;
+            && ph2.get_error_message().find("The nonterminal \"main\" doesn't exist.\n") != std::string::npos
+            && !add_result;
     });
 
     ut.set_test("generate with no external context", [&]() {
@@ -477,13 +483,35 @@ std::size_t test_class_Generator()
             main = {= V | W } | {C}
             C = C1 | C2 | C3
         )"};
-        ph.add(syntax);
+        const bool add_result = ph.add(syntax);
         auto r = ph.generate();
         return r == "X"
             && ph.get_error_message().empty()
             && ph.get_number_of_syntax() == 2
             && ph.get_weight() == 14
-            && ph.get_combination_number() == 14;
+            && ph.get_combination_number() == 14
+            && add_result;
+    });
+
+    ut.set_test("Add syntax (copy) wiht error", [&]() {
+        tphrase::Generator ph{R"(
+            main = {= X | Y | Z } | {A} | {B}
+            A = A1 | A2 | A3
+            B = B1 | B2 | B3
+        )"};
+        tphrase::Syntax syntax{R"(
+            main = {= V | W } | {C}
+            C = C1 | C2 | C3 |
+        )"};
+        const bool add_result = ph.add(syntax);
+        auto r = ph.generate();
+        return r == "X"
+            && syntax.get_error_message().find("A text is expected.") != std::string::npos
+            && ph.get_error_message().find("A text is expected.") != std::string::npos
+            && ph.get_number_of_syntax() == 1
+            && ph.get_weight() == 9
+            && ph.get_combination_number() == 9
+            && !add_result;
     });
 
     ut.set_test("Add syntax (move)", [&]() {
@@ -496,13 +524,34 @@ std::size_t test_class_Generator()
             main = {= V | W } | {C}
             C = C1 | C2 | C3
         )"};
-        ph.add(std::move(syntax));
+        const bool add_result = ph.add(std::move(syntax));
         auto r = ph.generate();
         return r == "X"
             && ph.get_error_message().empty()
             && ph.get_number_of_syntax() == 2
             && ph.get_weight() == 14
-            && ph.get_combination_number() == 14;
+            && ph.get_combination_number() == 14
+            && add_result;
+    });
+
+    ut.set_test("Add syntax (move) wiht error", [&]() {
+        tphrase::Generator ph{R"(
+            main = {= X | Y | Z } | {A} | {B}
+            A = A1 | A2 | A3
+            B = B1 | B2 | B3
+        )"};
+        tphrase::Syntax syntax{R"(
+            main = {= V | W } | {C}
+            C = C1 | C2 | C3 |
+        )"};
+        const bool add_result = ph.add(std::move(syntax));
+        auto r = ph.generate();
+        return r == "X"
+            && ph.get_error_message().find("A text is expected.") != std::string::npos
+            && ph.get_number_of_syntax() == 1
+            && ph.get_weight() == 9
+            && ph.get_combination_number() == 9
+            && !add_result;
     });
 
     ut.set_test("Add syntax (copy) with start condition", [&]() {
@@ -515,13 +564,35 @@ std::size_t test_class_Generator()
             main2 = {= V | W } | {C}
             C = C1 | C2 | C3
         )"};
-        ph.add(syntax, "main2");
+        const bool add_result = ph.add(syntax, "main2");
         auto r = ph.generate();
         return r == "X"
             && ph.get_error_message().empty()
             && ph.get_number_of_syntax() == 2
             && ph.get_weight() == 14
-            && ph.get_combination_number() == 14;
+            && ph.get_combination_number() == 14
+            && add_result;
+    });
+
+    ut.set_test("Add syntax (copy) with start condition and error", [&]() {
+        tphrase::Generator ph{R"(
+            main = {= X | Y | Z } | {A} | {B}
+            A = A1 | A2 | A3
+            B = B1 | B2 | B3
+        )"};
+        tphrase::Syntax syntax{R"(
+            main2 = {= V | W } | {C}
+            C = C1 | C2 | C3 |
+        )"};
+        const bool add_result = ph.add(syntax, "main2");
+        auto r = ph.generate();
+        return r == "X"
+            && syntax.get_error_message().find("A text is expected.") != std::string::npos
+            && ph.get_error_message().find("A text is expected.") != std::string::npos
+            && ph.get_number_of_syntax() == 1
+            && ph.get_weight() == 9
+            && ph.get_combination_number() == 9
+            && !add_result;
     });
 
     ut.set_test("Add syntax (move) with start condition", [&]() {
@@ -534,13 +605,34 @@ std::size_t test_class_Generator()
             main3 = {= V | W } | {C}
             C = C1 | C2 | C3
         )"};
-        ph.add(std::move(syntax), "main3");
+        const bool add_result = ph.add(std::move(syntax), "main3");
         auto r = ph.generate();
         return r == "X"
             && ph.get_error_message().empty()
             && ph.get_number_of_syntax() == 2
             && ph.get_weight() == 14
-            && ph.get_combination_number() == 14;
+            && ph.get_combination_number() == 14
+            && add_result;
+    });
+
+    ut.set_test("Add syntax (move) with start condition and error", [&]() {
+        tphrase::Generator ph{R"(
+            main = {= X | Y | Z } | {A} | {B}
+            A = A1 | A2 | A3
+            B = B1 | B2 | B3
+        )"};
+        tphrase::Syntax syntax{R"(
+            main2 = {= V | W } | {C}
+            C = C1 | C2 | C3 |
+        )"};
+        const bool add_result = ph.add(std::move(syntax), "main2");
+        auto r = ph.generate();
+        return r == "X"
+            && ph.get_error_message().find("A text is expected.") != std::string::npos
+            && ph.get_number_of_syntax() == 1
+            && ph.get_weight() == 9
+            && ph.get_combination_number() == 9
+            && !add_result;
     });
 
     ut.set_test("Add via R-Value Syntax (a pair of input iterators)", [&]() {

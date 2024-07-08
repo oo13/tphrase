@@ -159,6 +159,28 @@ std::size_t test_class_Syntax()
             && !good;
     });
 
+    ut.set_test("Add Syntax (copy) with overwriting", [&]() {
+        tphrase::Syntax syntax1{R"(
+            main = {= A | B | C } | {B} | {C}
+
+            B = B1 | B2 | B3
+            C = C1 | C2 | C3
+        )"};
+        tphrase::Syntax syntax2{R"(
+            main = {= X | Y | Z } | {Y} | {Z}
+
+            Y = Y1 | Y2 | Y3
+            Z = Z1 | Z2 | Z3
+        )"};
+        const bool good = syntax1.add(syntax2);
+        tphrase::Generator ph{syntax1};
+        auto r = ph.generate();
+        return r == "X"
+            && syntax1.get_error_message() == "The nonterminal \"main\" is already defined.\n"
+            && ph.get_error_message() == "The nonterminal \"main\" is already defined.\n"
+            && good;
+    });
+
     ut.set_test("Add Syntax (move) without error", [&]() {
         tphrase::Syntax syntax1{R"(
             main = {= A | B | C } | {B} | {C} |
@@ -199,6 +221,28 @@ std::size_t test_class_Syntax()
             && !good;
     });
 
+    ut.set_test("Add Syntax (move) with overwriting", [&]() {
+        tphrase::Syntax syntax1{R"(
+            main = {= A | B | C } | {B} | {C}
+
+            B = B1 | B2 | B3
+            C = C1 | C2 | C3
+        )"};
+        tphrase::Syntax syntax2{R"(
+            main = {= X | Y | Z } | {Y} | {Z}
+
+            Y = Y1 | Y2 | Y3
+            Z = Z1 | Z2 | Z3
+        )"};
+        const bool good = syntax1.add(std::move(syntax2));
+        tphrase::Generator ph{syntax1};
+        auto r = ph.generate();
+        return r == "X"
+            && syntax1.get_error_message() == "The nonterminal \"main\" is already defined.\n"
+            && ph.get_error_message() == "The nonterminal \"main\" is already defined.\n"
+            && good;
+    });
+
     ut.set_test("Add a pair of input iterators", [&]() {
         tphrase::Syntax syntax{R"(
             main = {:= A | B | C } | {B} | {C} |
@@ -220,6 +264,30 @@ std::size_t test_class_Syntax()
             && !good;
     });
 
+    ut.set_test("Add a pair of input iterators with overwriting", [&]() {
+        tphrase::Syntax syntax{R"(
+            main = {:= A | B | C } | {B} | {C}
+
+            B = B1 | B2 | B3
+            C = C1 | C2 | C3
+        )"};
+        std::istringstream s{R"(
+            main = {:= X | Y | Z } | {Y} | {Z}
+
+            Y = Y1 | Y2 | Y3
+            Z = Z1 | Z2 | Z3
+        )"};
+        s.unsetf(std::ios_base::skipws);
+        const bool good = syntax.add(std::istream_iterator<char>{s},
+                                     std::istream_iterator<char>{});
+        tphrase::Generator ph{syntax};
+        auto r = ph.generate();
+        return r == "X"
+            && syntax.get_error_message() == "The nonterminal \"main\" is already defined.\n"
+            && ph.get_error_message() == "The nonterminal \"main\" is already defined.\n"
+            && good;
+    });
+
     ut.set_test("Add a std::string", [&]() {
         tphrase::Syntax syntax{R"(
             main = {:= A | B | C } | {B} | {C} |
@@ -239,6 +307,28 @@ std::size_t test_class_Syntax()
             && !good;
     });
 
+    ut.set_test("Add a std::string with overwriting", [&]() {
+        tphrase::Syntax syntax{R"(
+            main = {:= A | B | C } | {B} | {C}
+
+            B = B1 | B2 | B3
+            C = C1 | C2 | C3
+        )"};
+        std::string s{R"(
+            main = {:= X | Y | Z } | {Y} | {Z}
+
+            Y = Y1 | Y2 | Y3
+            Z = Z1 | Z2 | Z3
+        )"};
+        const bool good = syntax.add(s);
+        tphrase::Generator ph{syntax};
+        auto r = ph.generate();
+        return r == "X"
+            && syntax.get_error_message() == "The nonterminal \"main\" is already defined.\n"
+            && ph.get_error_message() == "The nonterminal \"main\" is already defined.\n"
+            && good;
+    });
+
     ut.set_test("Add a const char*", [&]() {
         tphrase::Syntax syntax{R"(
             main = {:= A | B | C } | {B} | {C} |
@@ -255,6 +345,27 @@ std::size_t test_class_Syntax()
         return syntax.get_error_message().find("A text is expected.") != std::string::npos
             && syntax.get_error_message().find("The non-empty pattern is expected.") != std::string::npos
             && !good;
+    });
+
+    ut.set_test("Add a const char* with overwriting", [&]() {
+        tphrase::Syntax syntax{R"(
+            main = {:= A | B | C } | {B} | {C}
+
+            B = B1 | B2 | B3
+            C = C1 | C2 | C3
+        )"};
+        const bool good = syntax.add(R"(
+            main = {:= X | Y | Z } | {Y} | {Z}
+
+            Y = Y1 | Y2 | Y3
+            Z = Z1 | Z2 | Z3
+        )");
+        tphrase::Generator ph{syntax};
+        auto r = ph.generate();
+        return r == "X"
+            && syntax.get_error_message() == "The nonterminal \"main\" is already defined.\n"
+            && ph.get_error_message() == "The nonterminal \"main\" is already defined.\n"
+            && good;
     });
 
     ut.set_test("clear_error", [&]() {

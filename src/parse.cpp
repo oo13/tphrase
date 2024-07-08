@@ -207,7 +207,11 @@ namespace {
             if (op_type == ':') {
                 rule.equalize_chance(true);
             }
-            syntax.add(std::move(nonterminal), std::move(rule));
+            std::string err_msg;
+            syntax.add(std::move(nonterminal), std::move(rule), err_msg);
+            if (!err_msg.empty()) {
+                throw_parse_error(it, err_msg);
+            }
         } else {
             throw_parse_error(it, "The end of the text or \"\\n\" is expected.");
         }
