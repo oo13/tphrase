@@ -206,11 +206,11 @@ The chance to select {A21} is 35%, {A22} is 35%. {A1} and {A2} aren't affected b
 
 A weight of a nonterminal can be specified between the nonterminal and the assignment operator. For example:
 ```
-SUB 1 = {A} | {B}
+SUB 1 = A | B
 ```
 It's equivalent to this:
 ```
-SUB = "{A}" 0.5 | "{B}" 0.5
+SUB = "A" 0.5 | "B" 0.5
 ```
 The weight of the nonterminal is the sum of the weight of the options in the production rule by default.
 
