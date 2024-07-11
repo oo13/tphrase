@@ -240,8 +240,8 @@ The chance of "text1" is 25%, "text2" is 25%, "{C}" is 50%. The chance of "{C}" 
 The text doesn't need to enclose quotations ('"', "'", or "`") if it meets these requirements:
    1. The text is not empty.
    1. The text has neither newline, "|", "~", nor "}" except for a part of an expansion.
-   1. The beginning of the text is other than the spaces and quotations. (The spaces preceding the text are not a part of the text. The expansion is a part of the text even if the expansion results the spaces or the empty string.)
-   1. The end of the text is not the spaces. (The spaces succeeding the text are not a part of the text. The expansion is a part of the text even if the expansion results the spaces or the empty string.)
+   1. The beginning of the text is other than the spaces and quotations. (The spaces, including the comment block, preceding the text are not a part of the text. The expansion is a part of the text even if the expansion results the spaces or the empty string.)
+   1. The end of the text is not the spaces. (The spaces, including the comment block, succeeding the text are not a part of the text. The expansion is a part of the text even if the expansion results the spaces or the empty string.)
    1. The text is not followed by a weight number. (The number is a part of the text.)
 
 The text may have expansions, which is a string enclosed by "{" and "}". The text can contain "{" only as the beginning of the expansion, and the expansion can include any character except "}". The rule is prior to the above rules, for example &quot; {&quot;} &quot; is a valid text.
@@ -253,7 +253,7 @@ The string enclosed by "{" and "}" is the expansion, which will be expanded into
 1. The local unsolved nonterminal occurs an error.
 1. If the external context specifies the substitution for the global unsolved nonterminal, it's applied.
 1. "{(}" and "{)}" will be expanded into "{" and "}".
-1. If the beginning of the expansion is "{*", the expansion will be expanded into the empty string. (Technically speaking, it's not a comment block.)
+1. If the beginning of the expansion is "{*", the expansion will be expanded into the empty string. (It's effectively a comment block.)
 1. If the beginning of the expansion is "{=" or "{:=", the content (except the first "=" or ":=") is considered as a production rule. For example, "{= A|B|C}" will be expanded into the result of the production rule "A|B|C". The syntax of the content is expressed by EBNF: `content = space_nl_opt, production_rule, space_nl_opt ;` "{:=" is, of course, the equalized select version of "{=".
 1. The other expansion will be expanded into itself removed outer "{" and "}". (I recommend that the nonterminal is noticeable to find it easily unless you will leave it unsolved.)
 
