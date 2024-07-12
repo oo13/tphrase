@@ -191,12 +191,12 @@ namespace tphrase {
         return pimpl->data;
     }
 
-    DataSyntax &&Syntax::move_syntax_data()
+    DataSyntax &&Syntax::move_syntax_data() &&
     {
         return std::move(pimpl->data);
     }
 
-    std::string &&Syntax::move_error_message()
+    std::string &&Syntax::move_error_message() &&
     {
         return std::move(pimpl->err_msg);
     }

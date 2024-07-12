@@ -356,12 +356,12 @@ namespace tphrase {
         /** The function used by Generator.
             \return An instance of a type not to be published for the library users.
         */
-        DataSyntax &&move_syntax_data();
+        DataSyntax &&move_syntax_data() &&;
 
         /** The function used by Generator.
             \return The error messages that have been generated after creating the instance or clearing the previous error messages.
         */
-        std::string &&move_error_message();
+        std::string &&move_error_message() &&;
 
     private:
         struct Impl;

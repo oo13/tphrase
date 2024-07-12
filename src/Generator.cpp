@@ -100,9 +100,9 @@ namespace tphrase {
     }
 
     Generator::Generator(Syntax &&syntax, const std::string &start_condition)
-        : pimpl{new Impl{syntax.move_error_message()}}
+        : pimpl{new Impl{std::move(syntax).move_error_message()}}
     {
-        pimpl->data.add(syntax.move_syntax_data(),
+        pimpl->data.add(std::move(syntax).move_syntax_data(),
                         start_condition,
                         pimpl->err_msg);
     }
@@ -175,8 +175,8 @@ namespace tphrase {
     bool Generator::add(Syntax &&syntax, const std::string &start_condition)
     {
         const std::size_t prev_len{pimpl->err_msg.size()};
-        pimpl->err_msg += syntax.get_error_message();
-        if (!pimpl->data.add(syntax.move_syntax_data(),
+        pimpl->err_msg += std::move(syntax).move_error_message();
+        if (!pimpl->data.add(std::move(syntax).move_syntax_data(),
                              start_condition,
                              pimpl->err_msg)) {
             return false;
