@@ -71,7 +71,7 @@ namespace tphrase {
         \param [in] min_len The minimum length at truncating.
         \return The truncated first line (except the line with only spaces) of the phrase syntax.
         \note This function is not used even in C++17 or earlier if begin == end is invalid, therefore trunc_syntax(it, 40), trunc_syntax(std::string{"aaa"}, 40), and trunc_syntax("aaa", 40) raise no errors.
-        \attention std::istream_iterator skips any white spaces by default, so you should configure the target input stream not to skip the spaces (stream.unsetf(std::ios_base::skipws)) if you want to use an istream_iterator.
+        \attention You want to use std::istreambuf_iterator, instead of std::istream_iterator, because it skips any white spaces by default. If you want to use an istream_iterator, you should configure the target input stream not to skip the spaces (stream.unsetf(std::ios_base::skipws)).
     */
     template<typename T, typename S> REQUIRES_CharInputIteratorConcept(T, S)
     auto trunc_syntax(T &&begin, S &&end, const std::size_t min_len = 40) -> decltype(begin == end, std::string{})

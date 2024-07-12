@@ -46,7 +46,14 @@ std::size_t test_class_Syntax()
         return syntax.get_error_message() == "";
     });
 
-    ut.set_test("Constructor with a pair of input iterators", [&]() {
+    ut.set_test("Constructor with a pair of input iterators#1", [&]() {
+        std::istringstream s{"main = a |"};
+        tphrase::Syntax syntax{std::istreambuf_iterator<char>{s},
+                               std::istreambuf_iterator<char>{}};
+        return syntax.get_error_message().find("A text is expected.") != std::string::npos;
+    });
+
+    ut.set_test("Constructor with a pair of input iterators#2", [&]() {
         std::istringstream s{"main = a |"};
         s.unsetf(std::ios_base::skipws);
         tphrase::Syntax syntax{std::istream_iterator<char>{s},
@@ -243,7 +250,27 @@ std::size_t test_class_Syntax()
             && good;
     });
 
-    ut.set_test("Add a pair of input iterators", [&]() {
+    ut.set_test("Add a pair of input iterators#1", [&]() {
+        tphrase::Syntax syntax{R"(
+            main = {:= A | B | C } | {B} | {C} |
+
+            B = B1 | B2 | B3
+            C = C1 | C2 | C3
+        )"};
+        std::istringstream s{R"(
+            main = {:= X | Y | Z } | {Y} | {Z} ~ ///
+
+            Y = Y1 | Y2 | Y3
+            Z = Z1 | Z2 | Z3
+        )"};
+        const bool good = syntax.add(std::istreambuf_iterator<char>{s},
+                                     std::istreambuf_iterator<char>{});
+        return syntax.get_error_message().find("A text is expected.") != std::string::npos
+            && syntax.get_error_message().find("The non-empty pattern is expected.") != std::string::npos
+            && !good;
+    });
+
+    ut.set_test("Add a pair of input iterators#2", [&]() {
         tphrase::Syntax syntax{R"(
             main = {:= A | B | C } | {B} | {C} |
 
@@ -264,7 +291,30 @@ std::size_t test_class_Syntax()
             && !good;
     });
 
-    ut.set_test("Add a pair of input iterators with overwriting", [&]() {
+    ut.set_test("Add a pair of input iterators with overwriting#1", [&]() {
+        tphrase::Syntax syntax{R"(
+            main = {:= A | B | C } | {B} | {C}
+
+            B = B1 | B2 | B3
+            C = C1 | C2 | C3
+        )"};
+        std::istringstream s{R"(
+            main = {:= X | Y | Z } | {Y} | {Z}
+
+            Y = Y1 | Y2 | Y3
+            Z = Z1 | Z2 | Z3
+        )"};
+        const bool good = syntax.add(std::istreambuf_iterator<char>{s},
+                                     std::istreambuf_iterator<char>{});
+        tphrase::Generator ph{syntax};
+        auto r = ph.generate();
+        return r == "X"
+            && syntax.get_error_message() == "The nonterminal \"main\" is already defined.\n"
+            && ph.get_error_message() == "The nonterminal \"main\" is already defined.\n"
+            && good;
+    });
+
+    ut.set_test("Add a pair of input iterators with overwriting#2", [&]() {
         tphrase::Syntax syntax{R"(
             main = {:= A | B | C } | {B} | {C}
 

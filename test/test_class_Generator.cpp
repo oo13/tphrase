@@ -115,7 +115,23 @@ std::size_t test_class_Generator()
             && ph.get_error_message().find("The nonterminal \"main3\" doesn't exist.\n") != std::string::npos;
     });
 
-    ut.set_test("Constructor via R-Value Syntax (a pair of input iterators)", [&]() {
+    ut.set_test("Constructor via R-Value Syntax (a pair of input iterators)#1", [&]() {
+        std::istringstream s{R"(
+            main = {:= X | Y | Z } | {A} | {B}
+
+            A = A1 | A2 | A3 ~ ///
+
+            B = B1 | B2 | B3
+        )"};
+        tphrase::Generator ph{{std::istreambuf_iterator<char>{s},
+                               std::istreambuf_iterator<char>{}}};
+        auto r = ph.generate();
+        return r == "nil"
+            && ph.get_error_message().find("The non-empty pattern is expected.") != std::string::npos
+            && ph.get_error_message().find("The nonterminal \"main\" doesn't exist.\n") != std::string::npos;
+    });
+
+    ut.set_test("Constructor via R-Value Syntax (a pair of input iterators)#2", [&]() {
         std::istringstream s{R"(
             main = {:= X | Y | Z } | {A} | {B}
 
@@ -635,7 +651,27 @@ std::size_t test_class_Generator()
             && !add_result;
     });
 
-    ut.set_test("Add via R-Value Syntax (a pair of input iterators)", [&]() {
+    ut.set_test("Add via R-Value Syntax (a pair of input iterators)#1", [&]() {
+        tphrase::Generator ph{R"(
+            main = {= X | Y | Z } | {A} | {B}
+            A = A1 | A2 | A3
+            B = B1 | B2 | B3
+        )"};
+        std::istringstream s{R"(
+            main = {= V | W } | {C}
+            C = C1 | C2 | C3
+        )"};
+        ph.add({std::istreambuf_iterator<char>{s},
+                std::istreambuf_iterator<char>{}});
+        auto r = ph.generate();
+        return r == "X"
+            && ph.get_error_message().empty()
+            && ph.get_number_of_syntax() == 2
+            && ph.get_weight() == 14
+            && ph.get_combination_number() == 14;
+    });
+
+    ut.set_test("Add via R-Value Syntax (a pair of input iterators)#2", [&]() {
         tphrase::Generator ph{R"(
             main = {= X | Y | Z } | {A} | {B}
             A = A1 | A2 | A3

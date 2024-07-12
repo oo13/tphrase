@@ -145,7 +145,27 @@ std::size_t test_class_InputIterator()
     b++;
     (void)b;
 
-    ut.set_test("std::sstream Iterator L-Value", [&]() {
+    ut.set_test("std::sstream Iterator L-Value#1", [&]() {
+        std::istringstream s{"012"};
+        using it_t = std::istreambuf_iterator<char>;
+        it_t b{s};
+        it_t e;
+        tphrase::InputIterator<it_t, it_t> it{b, e};
+        bool good = true;
+        good &= *it == '0';
+        good &= !it.is_end();
+        ++it;
+        good &= *it == '1';
+        good &= !it.is_end();
+        ++it;
+        good &= *it == '2';
+        good &= !it.is_end();
+        ++it;
+        good &= it.is_end();
+        return good;
+    });
+
+    ut.set_test("std::sstream Iterator L-Value#2", [&]() {
         std::istringstream s{"012"};
         using it_t = std::istream_iterator<char>;
         it_t b{s};
@@ -165,7 +185,25 @@ std::size_t test_class_InputIterator()
         return good;
     });
 
-    ut.set_test("std::sstream Iterator R-Value", [&]() {
+    ut.set_test("std::sstream Iterator R-Value#1", [&]() {
+        std::istringstream s{"012"};
+        using it_t = std::istreambuf_iterator<char>;
+        tphrase::InputIterator<it_t, it_t> it{it_t{s}, it_t{}};
+        bool good = true;
+        good &= *it == '0';
+        good &= !it.is_end();
+        ++it;
+        good &= *it == '1';
+        good &= !it.is_end();
+        ++it;
+        good &= *it == '2';
+        good &= !it.is_end();
+        ++it;
+        good &= it.is_end();
+        return good;
+    });
+
+    ut.set_test("std::sstream Iterator R-Value#2", [&]() {
         std::istringstream s{"012"};
         using it_t = std::istream_iterator<char>;
         tphrase::InputIterator<it_t, it_t> it{it_t{s}, it_t{}};

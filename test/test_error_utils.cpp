@@ -48,7 +48,14 @@ std::size_t test_error_utils()
         return r == "main = \"0123456789\"";
     });
 
-    ut.set_test("trunc_syntax input iterator's pair", [&]() {
+    ut.set_test("trunc_syntax input iterator's pair#1", [&]() {
+        std::istringstream s{"main = \"0123456789\""};
+        auto r{tphrase::trunc_syntax(std::istreambuf_iterator<char>{s},
+                                     std::istreambuf_iterator<char>{})};
+        return r == "main = \"0123456789\"";
+    });
+
+    ut.set_test("trunc_syntax input iterator's pair#2", [&]() {
         std::istringstream s{"main = \"0123456789\""};
         s.unsetf(std::ios_base::skipws);
         auto r{tphrase::trunc_syntax(std::istream_iterator<char>{s},
@@ -56,7 +63,17 @@ std::size_t test_error_utils()
         return r == "main = \"0123456789\"";
     });
 
-    ut.set_test("trunc_syntax InputIterator", [&]() {
+    ut.set_test("trunc_syntax InputIterator#1", [&]() {
+        std::istringstream s{"main = \"0123456789\""};
+        tphrase::InputIterator<std::istreambuf_iterator<char>,
+                               std::istreambuf_iterator<char>>
+            it{std::istreambuf_iterator<char>{s},
+               std::istreambuf_iterator<char>{}};
+        auto r{tphrase::trunc_syntax(it)};
+        return r == "main = \"0123456789\"";
+    });
+
+    ut.set_test("trunc_syntax InputIterator#2", [&]() {
         std::istringstream s{"main = \"0123456789\""};
         s.unsetf(std::ios_base::skipws);
         tphrase::InputIterator<std::istream_iterator<char>,
@@ -81,7 +98,16 @@ std::size_t test_error_utils()
         return r == "main = 0 | 1 | 2 | 3 | 4 | 5 |...";
     });
 
-    ut.set_test("trunc_syntax input iterator's pair with min_len", [&]() {
+    ut.set_test("trunc_syntax input iterator's pair with min_len#1", [&]() {
+        std::istringstream s{R"(
+            main = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+        )"};
+        auto r{tphrase::trunc_syntax(std::istreambuf_iterator<char>{s},
+                                     std::istreambuf_iterator<char>{}, 15)};
+        return r == "main = 0 | 1 |...";
+    });
+
+    ut.set_test("trunc_syntax input iterator's pair with min_len#2", [&]() {
         std::istringstream s{R"(
             main = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
         )"};
@@ -91,7 +117,19 @@ std::size_t test_error_utils()
         return r == "main = 0 | 1 |...";
     });
 
-    ut.set_test("trunc_syntax InputIterator with min_len", [&]() {
+    ut.set_test("trunc_syntax InputIterator with min_len#1", [&]() {
+        std::istringstream s{R"(
+            main = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+        )"};
+        tphrase::InputIterator<std::istreambuf_iterator<char>,
+                               std::istreambuf_iterator<char>>
+            it{std::istreambuf_iterator<char>{s},
+               std::istreambuf_iterator<char>{}};
+        auto r{tphrase::trunc_syntax(it, 25)};
+        return r == "main = 0 | 1 | 2 | 3 | 4...";
+    });
+
+    ut.set_test("trunc_syntax InputIterator with min_len#2", [&]() {
         std::istringstream s{R"(
             main = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
         )"};

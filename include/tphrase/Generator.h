@@ -236,7 +236,7 @@ namespace tphrase {
             \note Some parse errors may be detected if src has errors.
             \note get_error_message() will return an empty string if no errors are detected.
             \note An empty phrase syntax is created if some errors are detected.
-            \attention std::istream_iterator skips any white spaces by default, so you should configure the target input stream not to skip the spaces (stream.unsetf(std::ios_base::skipws)) if you want to use an istream_iterator.
+            \attention You want to use std::istreambuf_iterator, instead of std::istream_iterator, because it skips any white spaces by default. If you want to use an istream_iterator, you should configure the target input stream not to skip the spaces (stream.unsetf(std::ios_base::skipws)).
         */
         template<typename T, typename S> REQUIRES_CharInputIteratorConcept(T, S)
         Syntax(T &&begin, S &&end);
@@ -300,7 +300,7 @@ namespace tphrase {
             \note Some parse errors may be detected if src has errors.
             \note No phrase syntax is added if some parse errors are detected.
             \note If the source syntax has the nonterminal that this already contains, then: (1) the nonterminal in the source syntax overwrites it, (2) an error message is added to this, (3) true is returned unless some parse errors are detected.
-            \attention std::istream_iterator skips any white spaces by default, so you should configure the target input stream not to skip the spaces (stream.unsetf(std::ios_base::skipws)) if you want to use an istream_iterator.
+            \attention You want to use std::istreambuf_iterator, instead of std::istream_iterator, because it skips any white spaces by default. If you want to use an istream_iterator, you should configure the target input stream not to skip the spaces (stream.unsetf(std::ios_base::skipws)).
         */
         template<typename T, typename S> REQUIRES_CharInputIteratorConcept(T, S)
         bool add(T &&begin, S &&end);
