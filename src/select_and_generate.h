@@ -59,7 +59,7 @@ namespace tphrase {
                 i = std::floor(r * target.size());
             } else {
                 r *= weights.back();
-                const auto it = std::lower_bound(weights.cbegin(), weights.cend(), r);
+                const auto it = std::upper_bound(weights.cbegin(), weights.cend(), r);
                 i = it - weights.cbegin();
                 if (i >= target.size()) {
                     i = 0;
