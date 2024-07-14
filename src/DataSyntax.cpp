@@ -31,7 +31,6 @@ namespace tphrase {
     DataSyntax::DataSyntax()
         : assignments{},
           start_it{assignments.end()},
-          is_bound{false},
           binding_epoch{0}
     {
     }
@@ -39,10 +38,9 @@ namespace tphrase {
     DataSyntax::DataSyntax(const DataSyntax &a)
         : assignments{a.assignments},
           start_it{assignments.end()},
-          is_bound{false},
           binding_epoch{0}
     {
-        if (a.is_bound) {
+        if (a.start_it != a.assignments.end()) {
             std::string err_msg;
             bind_syntax(a.start_it->first, err_msg); // It should not generate any error messages.
         }
@@ -51,7 +49,6 @@ namespace tphrase {
     DataSyntax::DataSyntax(DataSyntax &&a)
         : assignments{},
           start_it{a.start_it},
-          is_bound{a.is_bound},
           binding_epoch{a.binding_epoch}
     {
         // swap() doesn't invalidate any iterators except end().
@@ -66,9 +63,8 @@ namespace tphrase {
     {
         assignments = a.assignments;
         start_it = assignments.end();
-        is_bound = false;
         binding_epoch = 0;
-        if (a.is_bound) {
+        if (a.start_it != a.assignments.end()) {
             std::string err_msg;
             bind_syntax(a.start_it->first, err_msg); // It should not generate any error messages.
         }
@@ -85,7 +81,6 @@ namespace tphrase {
         } else {
             start_it = a.start_it;
         }
-        is_bound = a.is_bound;
         binding_epoch = a.binding_epoch;
         return *this;
     }
@@ -130,7 +125,7 @@ namespace tphrase {
     DataProductionRule &
     DataSyntax::get_production_rule(const std::string &nonterminal)
     {
-        auto it = assignments.find(nonterminal);
+        auto it{assignments.find(nonterminal)};
         if (it == assignments.end()) {
             throw std::runtime_error("The nonterminal is not found.");
         }
@@ -141,8 +136,8 @@ namespace tphrase {
                          DataProductionRule &&rule,
                          std::string &err_msg)
     {
-        is_bound = false;
-        auto it = assignments.find(nonterminal);
+        start_it = assignments.end();
+        auto it{assignments.find(nonterminal)};
         if (it == assignments.end()) {
             assignments.emplace(std::move(nonterminal), std::move(rule));
             return true;
@@ -157,8 +152,9 @@ namespace tphrase {
 
     void DataSyntax::add(DataSyntax &&syntax, std::string &err_msg)
     {
+        start_it = assignments.end();
         for (auto &it : syntax.assignments) {
-            auto found = assignments.find(it.first);
+            auto found{assignments.find(it.first)};
             if (found == assignments.end()) {
                 assignments.emplace(it.first, std::move(it.second));
             } else {
@@ -168,17 +164,15 @@ namespace tphrase {
                 err_msg += "\" is already defined.\n";
             }
         }
-        is_bound = false;
     }
 
     bool DataSyntax::bind_syntax(const std::string &start_condition, std::string &err_msg)
     {
-        auto it = assignments.find(start_condition);
+        auto it{assignments.find(start_condition)};
         if (it != assignments.end()) {
             start_it = it;
         } else {
             start_it = assignments.end();
-            is_bound = false;
             err_msg += "The nonterminal \"";
             err_msg += start_condition;
             err_msg += "\" doesn't exist.\n";
@@ -195,7 +189,10 @@ namespace tphrase {
         }
         const std::size_t prev_len{err_msg.size()};
         start_it->second.bind_syntax(*this, binding_epoch, err_msg);
-        is_bound = err_msg.size() == prev_len;
+        const bool is_bound{err_msg.size() == prev_len};
+        if (!is_bound) {
+            start_it = assignments.end();
+        }
         return is_bound;
     }
 
@@ -217,7 +214,6 @@ namespace tphrase {
     {
         assignments.clear();
         start_it = assignments.end();
-        is_bound = false;
         binding_epoch = 0;
     }
 }
