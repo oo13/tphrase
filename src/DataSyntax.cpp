@@ -48,6 +48,20 @@ namespace tphrase {
         }
     }
 
+    DataSyntax::DataSyntax(DataSyntax &&a)
+        : assignments{},
+          start_it{a.start_it},
+          is_bound{a.is_bound},
+          binding_epoch{a.binding_epoch}
+    {
+        // swap() doesn't invalidate any iterators except end().
+        const bool is_end{a.start_it == a.assignments.end()};
+        assignments.swap(a.assignments);
+        if (is_end) {
+            start_it = assignments.end();
+        }
+    }
+
     DataSyntax &DataSyntax::operator=(const DataSyntax &a)
     {
         assignments = a.assignments;
@@ -58,6 +72,21 @@ namespace tphrase {
             std::string err_msg;
             bind_syntax(a.start_it->first, err_msg); // It should not generate any error messages.
         }
+        return *this;
+    }
+
+    DataSyntax &DataSyntax::operator=(DataSyntax &&a)
+    {
+        // swap() doesn't invalidate any iterators except end().
+        const bool is_end{a.start_it == a.assignments.end()};
+        assignments.swap(a.assignments);
+        if (is_end) {
+            start_it = assignments.end();
+        } else {
+            start_it = a.start_it;
+        }
+        is_bound = a.is_bound;
+        binding_epoch = a.binding_epoch;
         return *this;
     }
 

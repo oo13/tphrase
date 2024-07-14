@@ -45,7 +45,7 @@ namespace tphrase {
         /** The move constructor.
             \param [inout] a The source.
         */
-        DataSyntax(DataSyntax &&a) = default;
+        DataSyntax(DataSyntax &&a);
 
         /** The assignment.
             \param [in] a The source.
@@ -57,7 +57,7 @@ namespace tphrase {
             \param [inout] a The source. (moved)
             \return *this
         */
-        DataSyntax &operator=(DataSyntax &&a) = default;
+        DataSyntax &operator=(DataSyntax &&a);
 
         /** Generate a phrase.
             \param [in] ext_context The external context that has some nonterminals and the substitutions.
