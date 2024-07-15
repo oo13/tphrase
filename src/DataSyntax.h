@@ -29,6 +29,7 @@
 #include <string>
 
 #include "tphrase/common/ext_context.h"
+#include "tphrase/common/syntax_id.h"
 #include "DataProductionRule.h"
 
 namespace tphrase {
@@ -122,6 +123,7 @@ namespace tphrase {
             \note Only the nonterminals that are directly or indirectly referred by the start condition are tried binding.
             \note An error is caused if the recursive reference to a nonterminal exists.
             \note An error is cause if the nonterminal start_condition doesn't exist.
+            \note The syntax ID is changed.
         */
         bool bind_syntax(const std::string &start_condition, std::string &err_msg);
 
@@ -134,18 +136,41 @@ namespace tphrase {
         /** Clear the instance. */
         void clear();
 
+        /** Get the syntax ID.
+            \return Syntax ID.
+            \note Return a value that is equivalent to false if not is_valid().
+            \note Copying and moving don't change the syntax ID.
+        */
+        SyntaxID_t get_syntax_id() const;
+
     private:
+        /** Try to bind the expansions on the nonterminals in this, but the syntax ID is preserved.
+            \param [in] start_condition The nonterminal where is the start condition.
+            \param [inout] err_msg The error messages are added if some errors are detected.
+            \return true if no errors are detected.
+            \note Only the nonterminals that are directly or indirectly referred by the start condition are tried binding.
+            \note An error is caused if the recursive reference to a nonterminal exists.
+            \note An error is cause if the nonterminal start_condition doesn't exist.
+        */
+        bool bind_syntax_preserve_id(const std::string &start_condition, std::string &err_msg);
+
         std::unordered_map<std::string, DataProductionRule> assignments; /**< The assignments in the syntax. */
         decltype(assignments)::iterator start_it; /**< The iterator for the start condition. */
         int binding_epoch; /**< The binding epoch. */
+        SyntaxID_t id; /**< The syntax ID. */
     };
 
     inline
     bool DataSyntax::is_valid() const
     {
-        return start_it != assignments.end();
+        return id != 0;
     }
 
+    inline
+    SyntaxID_t DataSyntax::get_syntax_id() const
+    {
+        return id;
+    }
 }
 
 #endif // TPHRASE_SRC_DATASYNTAX_H_

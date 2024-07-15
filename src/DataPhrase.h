@@ -29,6 +29,7 @@
 #include <vector>
 
 #include "tphrase/common/ext_context.h"
+#include "tphrase/common/syntax_id.h"
 #include "DataSyntax.h"
 
 namespace tphrase {
@@ -67,20 +68,27 @@ namespace tphrase {
             \param [in] syntax The phrase syntax to be copied and added.
             \param [in] start_condition The name of the nonterminal where is the start condition.
             \param [inout] err_msg The error messages are added if some errors are detected.
-            \return true if no errors are detected.
+            \return ID for the syntax added into the instance, or a value that is equivalent to false if no phrase syntax is added.
             \note Only the phrase syntax that contains the start condition can add.
             \note The recursive reference to a nonterminal is not allowed.
         */
-        bool add(const DataSyntax &syntax, const std::string &start_condition, std::string &err_msg);
+        SyntaxID_t add(const DataSyntax &syntax, const std::string &start_condition, std::string &err_msg);
         /** Add a phrase syntax.
             \param [inout] syntax The phrase syntax to be added. (moved)
             \param [in] start_condition The name of the nonterminal where is the start condition.
             \param [inout] err_msg The error messages are added if some errors are detected.
-            \return true if no errors are detected.
+            \return ID for the syntax added into the instance, or a value that is equivalent to false if no phrase syntax is added.
             \note Only the phrase syntax that contains the start condition can add.
             \note The recursive reference to a nonterminal is not allowed.
         */
-        bool add(DataSyntax &&syntax, const std::string &start_condition, std::string &err_msg);
+        SyntaxID_t add(DataSyntax &&syntax, const std::string &start_condition, std::string &err_msg);
+
+        /** Remove a phrase syntax.
+            \param [in] id ID for the phrase syntax.
+            \return true if the phrase syntax is deleted.
+            \note This is an O(n) function, because it's assumed that the function is not used frequently.
+        */
+        bool remove(SyntaxID_t id);
 
         /** Clear the syntaxes and the error messages. */
         void clear();

@@ -149,39 +149,45 @@ namespace tphrase {
         return pimpl->data.generate(ext_context);
     }
 
-    bool Generator::add(const Syntax &syntax)
+    SyntaxID_t Generator::add(const Syntax &syntax)
     {
         return add(syntax, default_start_condition);
     }
 
-    bool Generator::add(Syntax &&syntax)
+    SyntaxID_t Generator::add(Syntax &&syntax)
     {
         return add(std::move(syntax), default_start_condition);
     }
 
-    bool Generator::add(const Syntax &syntax,
-                        const std::string &start_condition)
+    SyntaxID_t Generator::add(const Syntax &syntax,
+                              const std::string &start_condition)
     {
         const std::size_t prev_len{pimpl->err_msg.size()};
         pimpl->err_msg += syntax.get_error_message();
-        if (!pimpl->data.add(syntax.get_syntax_data(),
-                             start_condition,
-                             pimpl->err_msg)) {
-            return false;
+        if (prev_len != pimpl->err_msg.size()) {
+            return 0;
         }
-        return prev_len == pimpl->err_msg.size();
+        return pimpl->data.add(syntax.get_syntax_data(),
+                               start_condition,
+                               pimpl->err_msg);
     }
 
-    bool Generator::add(Syntax &&syntax, const std::string &start_condition)
+    SyntaxID_t Generator::add(Syntax &&syntax,
+                              const std::string &start_condition)
     {
         const std::size_t prev_len{pimpl->err_msg.size()};
         pimpl->err_msg += std::move(syntax).move_error_message();
-        if (!pimpl->data.add(std::move(syntax).move_syntax_data(),
-                             start_condition,
-                             pimpl->err_msg)) {
-            return false;
+        if (prev_len != pimpl->err_msg.size()) {
+            return 0;
         }
-        return prev_len == pimpl->err_msg.size();
+        return pimpl->data.add(std::move(syntax).move_syntax_data(),
+                               start_condition,
+                               pimpl->err_msg);
+    }
+
+    bool Generator::remove(SyntaxID_t id)
+    {
+        return pimpl->data.remove(id);
     }
 
     const std::string &Generator::get_error_message() const

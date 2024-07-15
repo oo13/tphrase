@@ -38,35 +38,56 @@ namespace tphrase {
         return select_and_generate(syntaxes, weights, equalized_chance, ext_context);
     }
 
-    bool DataPhrase::add(const DataSyntax &syntax,
-                         const std::string &start_condition,
-                         std::string &err_msg)
+    SyntaxID_t DataPhrase::add(const DataSyntax &syntax,
+                               const std::string &start_condition,
+                               std::string &err_msg)
     {
         DataSyntax add_syntax{syntax};
         add_syntax.bind_syntax(start_condition, err_msg);
         if (!add_syntax.is_valid()) {
-            return false;
+            return 0;
         }
 
         syntaxes.emplace_back(std::move(add_syntax));
         weights.emplace_back(get_weight() + syntaxes.back().get_weight());
 
-        return true;
+        return syntaxes.back().get_syntax_id();
     }
 
-    bool DataPhrase::add(DataSyntax &&syntax,
-                         const std::string &start_condition,
-                         std::string &err_msg)
+    SyntaxID_t DataPhrase::add(DataSyntax &&syntax,
+                               const std::string &start_condition,
+                               std::string &err_msg)
     {
         syntax.bind_syntax(start_condition, err_msg);
         if (!syntax.is_valid()) {
-            return false;
+            return 0;
         }
 
         syntaxes.emplace_back(std::move(syntax));
         weights.emplace_back(get_weight() + syntaxes.back().get_weight());
 
-        return true;
+        return syntaxes.back().get_syntax_id();
+    }
+
+    bool DataPhrase::remove(SyntaxID_t id)
+    {
+        bool removed{false};
+        for (auto it = syntaxes.cbegin(); it != syntaxes.cend(); ++it) {
+            if (it->get_syntax_id() == id) {
+                syntaxes.erase(it);
+                removed = true;
+                break;
+            }
+        }
+        if (removed) {
+            weights.pop_back();
+            double sum{0.0};
+            for (std::size_t i=0; i<weights.size(); ++i) {
+                sum += syntaxes[i].get_weight();
+                weights[i] = sum;
+            }
+        }
+        return removed;
     }
 
     void DataPhrase::clear()

@@ -28,6 +28,31 @@
 #include "UnitTest.h"
 #include "unit_test_utility.h"
 
+namespace {
+    struct PhraseNumber_t {
+        std::size_t syntax;
+        std::size_t combination;
+        double weight;
+
+        PhraseNumber_t(std::size_t s, std::size_t c, double w)
+            : syntax{s}, combination{c}, weight{w}
+        {
+        }
+        PhraseNumber_t(const tphrase::Generator &a)
+            : syntax{a.get_number_of_syntax()},
+              combination{a.get_combination_number()},
+              weight{a.get_weight()}
+        {
+        }
+        bool operator==(const PhraseNumber_t &a) const
+        {
+            return syntax == a.syntax
+                && combination == a.combination
+                && weight == a.weight;
+        }
+    };
+}
+
 std::size_t test_class_Generator()
 {
     UnitTest ut("class Generator");
@@ -259,6 +284,42 @@ std::size_t test_class_Generator()
             && ph2.get_error_message().find("The nonterminal \"main\" doesn't exist.\n") != std::string::npos;
     });
 
+    ut.set_test("Copy Constructor (ID is not changed)", [&]() {
+        tphrase::Generator ph1;
+        const auto id1 = ph1.add(R"(
+            main = {= X | Y | Z } | {A} | {B}
+
+            A = A1 | A2 | A3
+
+            B = B1 | B2 | B3
+        )");
+        const auto id2 = ph1.add(R"(
+            main = {= V | W } | {C}
+
+            C = C1 | C2 | C3
+        )");
+        tphrase::Generator ph2{ph1};
+
+        PhraseNumber_t n12{ph1};
+        ph1.remove(id1);
+        PhraseNumber_t n11{ph1};
+        ph1.remove(id2);
+        PhraseNumber_t n10{ph1};
+
+        PhraseNumber_t n22{ph2};
+        ph2.remove(id1);
+        PhraseNumber_t n21{ph2};
+        ph2.remove(id2);
+        PhraseNumber_t n20{ph2};
+        return id1 && id2
+            && n12 == n22
+            && n11 == n21
+            && n10 == n20
+            && n22 == PhraseNumber_t{2, 14, 14}
+            && n21 == PhraseNumber_t{1, 5, 5}
+            && n20 == PhraseNumber_t{0, 0, 0};
+    });
+
     ut.set_test("Move Constructor#1", [&]() {
         tphrase::Generator ph1{R"(
             main = {= X | Y | Z } | {A} | {B}
@@ -315,6 +376,35 @@ std::size_t test_class_Generator()
         return ph2.get_error_message().find("The non-empty pattern is expected.") != std::string::npos
             && ph2.get_error_message().find("A text is expected.") != std::string::npos
             && ph2.get_error_message().find("The nonterminal \"main\" doesn't exist.\n") != std::string::npos;
+    });
+
+    ut.set_test("Move Constructor (ID is not changed)", [&]() {
+        tphrase::Generator ph1;
+        const auto id1 = ph1.add(R"(
+            main = {= X | Y | Z } | {A} | {B}
+
+            A = A1 | A2 | A3
+
+            B = B1 | B2 | B3
+        )");
+        const auto id2 = ph1.add(R"(
+            main = {= V | W } | {C}
+
+            C = C1 | C2 | C3
+        )");
+        PhraseNumber_t n12{ph1};
+        tphrase::Generator ph2{std::move(ph1)};
+
+        PhraseNumber_t n22{ph2};
+        ph2.remove(id1);
+        PhraseNumber_t n21{ph2};
+        ph2.remove(id2);
+        PhraseNumber_t n20{ph2};
+        return id1 && id2
+            && n12 == n22
+            && n22 == PhraseNumber_t{2, 14, 14}
+            && n21 == PhraseNumber_t{1, 5, 5}
+            && n20 == PhraseNumber_t{0, 0, 0};
     });
 
     ut.set_test("Copy Assignment#1", [&]() {
@@ -403,6 +493,43 @@ std::size_t test_class_Generator()
             && !add_result;
     });
 
+    ut.set_test("Copy Assignment (ID is not changed)", [&]() {
+        tphrase::Generator ph1;
+        const auto id1 = ph1.add(R"(
+            main = {= X | Y | Z } | {A} | {B}
+
+            A = A1 | A2 | A3
+
+            B = B1 | B2 | B3
+        )");
+        const auto id2 = ph1.add(R"(
+            main = {= V | W } | {C}
+
+            C = C1 | C2 | C3
+        )");
+        tphrase::Generator ph2;
+        ph2 = ph1;
+
+        PhraseNumber_t n12{ph1};
+        ph1.remove(id1);
+        PhraseNumber_t n11{ph1};
+        ph1.remove(id2);
+        PhraseNumber_t n10{ph1};
+
+        PhraseNumber_t n22{ph2};
+        ph2.remove(id1);
+        PhraseNumber_t n21{ph2};
+        ph2.remove(id2);
+        PhraseNumber_t n20{ph2};
+        return id1 && id2
+            && n12 == n22
+            && n11 == n21
+            && n10 == n20
+            && n22 == PhraseNumber_t{2, 14, 14}
+            && n21 == PhraseNumber_t{1, 5, 5}
+            && n20 == PhraseNumber_t{0, 0, 0};
+    });
+
     ut.set_test("Move Assignment#1", [&]() {
         tphrase::Generator ph1{R"(
             main = {= X | Y | Z } | {A} | {B}
@@ -465,6 +592,36 @@ std::size_t test_class_Generator()
             && !add_result;
     });
 
+    ut.set_test("Move Assignment (ID is not changed)", [&]() {
+        tphrase::Generator ph1;
+        const auto id1 = ph1.add(R"(
+            main = {= X | Y | Z } | {A} | {B}
+
+            A = A1 | A2 | A3
+
+            B = B1 | B2 | B3
+        )");
+        const auto id2 = ph1.add(R"(
+            main = {= V | W } | {C}
+
+            C = C1 | C2 | C3
+        )");
+        PhraseNumber_t n12{ph1};
+        tphrase::Generator ph2;
+        ph2 = std::move(ph1);
+
+        PhraseNumber_t n22{ph2};
+        ph2.remove(id1);
+        PhraseNumber_t n21{ph2};
+        ph2.remove(id2);
+        PhraseNumber_t n20{ph2};
+        return id1 && id2
+            && n12 == n22
+            && n22 == PhraseNumber_t{2, 14, 14}
+            && n21 == PhraseNumber_t{1, 5, 5}
+            && n20 == PhraseNumber_t{0, 0, 0};
+    });
+
     ut.set_test("generate with no external context", [&]() {
         tphrase::Generator ph{R"(
             main = {= {X} | {Y} | {Z} }
@@ -509,7 +666,7 @@ std::size_t test_class_Generator()
             && add_result;
     });
 
-    ut.set_test("Add syntax (copy) wiht error", [&]() {
+    ut.set_test("Add syntax (copy) wiht error#1", [&]() {
         tphrase::Generator ph{R"(
             main = {= X | Y | Z } | {A} | {B}
             A = A1 | A2 | A3
@@ -528,6 +685,30 @@ std::size_t test_class_Generator()
             && ph.get_weight() == 9
             && ph.get_combination_number() == 9
             && !add_result;
+    });
+
+    ut.set_test("Add syntax (copy) wiht error#2 and not same ID", [&]() {
+        tphrase::Generator ph{R"(
+            main = {= X | Y | Z } | {A} | {B}
+            A = A1 | A2 | A3
+            B = B1 | B2 | B3
+        )"};
+        tphrase::Syntax syntax{R"(
+            main = {= V | W } | {C}
+            C = C1 | C2 | C3
+        )"};
+        syntax.add(R"(
+            C = C4
+        )");
+        const auto id1 = ph.add(syntax);
+        const auto err_msg = ph.get_error_message();
+        syntax.clear_error_message();
+        const auto id2 = ph.add(syntax);
+        const auto id3 = ph.add(syntax);
+        return !id1 && id2 && id3
+            && id2 != id3
+            && err_msg == "The nonterminal \"C\" is already defined.\n"
+            && PhraseNumber_t{ph} == PhraseNumber_t{3, 15, 15};
     });
 
     ut.set_test("Add syntax (move)", [&]() {
@@ -550,7 +731,7 @@ std::size_t test_class_Generator()
             && add_result;
     });
 
-    ut.set_test("Add syntax (move) wiht error", [&]() {
+    ut.set_test("Add syntax (move) wiht error#1", [&]() {
         tphrase::Generator ph{R"(
             main = {= X | Y | Z } | {A} | {B}
             A = A1 | A2 | A3
@@ -570,7 +751,34 @@ std::size_t test_class_Generator()
             && !add_result;
     });
 
-    ut.set_test("Add syntax (copy) with start condition", [&]() {
+    ut.set_test("Add syntax (move) wiht error#2 and not same ID", [&]() {
+        tphrase::Generator ph{R"(
+            main = {= X | Y | Z } | {A} | {B}
+            A = A1 | A2 | A3
+            B = B1 | B2 | B3
+        )"};
+        tphrase::Syntax syntax{R"(
+            main = {= V | W } | {C}
+            C = C1 | C2 | C3
+        )"};
+        syntax.add(R"(
+            C = C4
+        )");
+        tphrase::Syntax tmp1{syntax};
+        const auto id1 = ph.add(std::move(tmp1));
+        const auto err_msg = ph.get_error_message();
+        syntax.clear_error_message();
+        tphrase::Syntax tmp2{syntax};
+        const auto id2 = ph.add(std::move(tmp2));
+        tphrase::Syntax tmp3{syntax};
+        const auto id3 = ph.add(std::move(tmp3));
+        return !id1 && id2 && id3
+            && id2 != id3
+            && err_msg == "The nonterminal \"C\" is already defined.\n"
+            && PhraseNumber_t{ph} == PhraseNumber_t{3, 15, 15};
+    });
+
+    ut.set_test("Add syntax (move) with start condition", [&]() {
         tphrase::Generator ph{R"(
             main = {= X | Y | Z } | {A} | {B}
             A = A1 | A2 | A3
@@ -590,7 +798,7 @@ std::size_t test_class_Generator()
             && add_result;
     });
 
-    ut.set_test("Add syntax (copy) with start condition and error", [&]() {
+    ut.set_test("Add syntax (copy) with start condition and error#1", [&]() {
         tphrase::Generator ph{R"(
             main = {= X | Y | Z } | {A} | {B}
             A = A1 | A2 | A3
@@ -609,6 +817,30 @@ std::size_t test_class_Generator()
             && ph.get_weight() == 9
             && ph.get_combination_number() == 9
             && !add_result;
+    });
+
+    ut.set_test("Add syntax (copy) wiht start condition, error#2, and not same ID", [&]() {
+        tphrase::Generator ph{R"(
+            main = {= X | Y | Z } | {A} | {B}
+            A = A1 | A2 | A3
+            B = B1 | B2 | B3
+        )"};
+        tphrase::Syntax syntax{R"(
+            main2 = {= V | W } | {C}
+            C = C1 | C2 | C3
+        )"};
+        syntax.add(R"(
+            C = C4
+        )");
+        const auto id1 = ph.add(syntax, "main2");
+        const auto err_msg = ph.get_error_message();
+        syntax.clear_error_message();
+        const auto id2 = ph.add(syntax, "main2");
+        const auto id3 = ph.add(syntax, "main2");
+        return !id1 && id2 && id3
+            && id2 != id3
+            && err_msg == "The nonterminal \"C\" is already defined.\n"
+            && PhraseNumber_t{ph} == PhraseNumber_t{3, 15, 15};
     });
 
     ut.set_test("Add syntax (move) with start condition", [&]() {
@@ -631,7 +863,7 @@ std::size_t test_class_Generator()
             && add_result;
     });
 
-    ut.set_test("Add syntax (move) with start condition and error", [&]() {
+    ut.set_test("Add syntax (move) with start condition and error#1", [&]() {
         tphrase::Generator ph{R"(
             main = {= X | Y | Z } | {A} | {B}
             A = A1 | A2 | A3
@@ -649,6 +881,33 @@ std::size_t test_class_Generator()
             && ph.get_weight() == 9
             && ph.get_combination_number() == 9
             && !add_result;
+    });
+
+    ut.set_test("Add syntax (move) wiht start condition, error#2, and not same ID", [&]() {
+        tphrase::Generator ph{R"(
+            main = {= X | Y | Z } | {A} | {B}
+            A = A1 | A2 | A3
+            B = B1 | B2 | B3
+        )"};
+        tphrase::Syntax syntax{R"(
+            main2 = {= V | W } | {C}
+            C = C1 | C2 | C3
+        )"};
+        syntax.add(R"(
+            C = C4
+        )");
+        tphrase::Syntax tmp1{syntax};
+        const auto id1 = ph.add(std::move(tmp1), "main2");
+        const auto err_msg = ph.get_error_message();
+        syntax.clear_error_message();
+        tphrase::Syntax tmp2{syntax};
+        const auto id2 = ph.add(std::move(tmp2), "main2");
+        tphrase::Syntax tmp3{syntax};
+        const auto id3 = ph.add(std::move(tmp3), "main2");
+        return !id1 && id2 && id3
+            && id2 != id3
+            && err_msg == "The nonterminal \"C\" is already defined.\n"
+            && PhraseNumber_t{ph} == PhraseNumber_t{3, 15, 15};
     });
 
     ut.set_test("Add via R-Value Syntax (a pair of input iterators)#1", [&]() {
@@ -727,6 +986,102 @@ std::size_t test_class_Generator()
             && ph.get_number_of_syntax() == 2
             && ph.get_weight() == 14
             && ph.get_combination_number() == 14;
+    });
+
+    ut.set_test("Remove phrase first", [&]() {
+        tphrase::Generator::set_random_function(get_sequence_random_func({
+            0.9, 0.9, 0.9, 0.9, 0.9, 0.9
+        }));
+        tphrase::Generator ph;
+        const auto id1 = ph.add(R"(main = "1" 2 | 2 | 3)");
+        const auto id2 = ph.add(R"(main = A | "B" 3 | C)");
+        const auto id3 = ph.add(R"(main = あ | い | "う" 4)");
+        const auto r3 = ph.generate();
+        const PhraseNumber_t n3{ph};
+        const auto del3 = ph.remove(id1);
+        const auto del32 = ph.remove(id1);
+        const auto r2 = ph.generate();
+        const PhraseNumber_t n2{ph};
+        const auto del2 = ph.remove(id2);
+        const auto del22 = ph.remove(id2);
+        const auto r1 = ph.generate();
+        const PhraseNumber_t n1{ph};
+        const auto del1 = ph.remove(id3);
+        const auto del12 = ph.remove(id3);
+        const auto r0 = ph.generate();
+        const PhraseNumber_t n0{ph};
+        return del1 && del2 && del3
+            && !del32 && !del22 && !del12
+            && id1 && id2 && id3
+            && r3 == "う" && r2 == "う" && r1 == "う" && r0 == "nil"
+            && n3 == PhraseNumber_t{3, 9, 15}
+            && n2 == PhraseNumber_t{2, 6, 11}
+            && n1 == PhraseNumber_t{1, 3, 6}
+            && n0 == PhraseNumber_t{0, 0, 0};
+    });
+
+    ut.set_test("Remove phrase last", [&]() {
+        tphrase::Generator::set_random_function(get_sequence_random_func({
+            0.9, 0.9, 0.9, 0.9, 0.9, 0.9
+        }));
+        tphrase::Generator ph;
+        const auto id1 = ph.add(R"(main = "1" 2 | 2 | 3)");
+        const auto id2 = ph.add(R"(main = A | "B" 3 | C)");
+        const auto id3 = ph.add(R"(main = あ | い | "う" 4)");
+        const auto r3 = ph.generate();
+        const PhraseNumber_t n3{ph};
+        const auto del3 = ph.remove(id3);
+        const auto del32 = ph.remove(id3);
+        const auto r2 = ph.generate();
+        const PhraseNumber_t n2{ph};
+        const auto del2 = ph.remove(id2);
+        const auto del22 = ph.remove(id2);
+        const auto r1 = ph.generate();
+        const PhraseNumber_t n1{ph};
+        const auto del1 = ph.remove(id1);
+        const auto del12 = ph.remove(id1);
+        const auto r0 = ph.generate();
+        const PhraseNumber_t n0{ph};
+        return del1 && del2 && del3
+            && !del32 && !del22 && !del12
+            && id1 && id2 && id3
+            && r3 == "う" && r2 == "C" && r1 == "3" && r0 == "nil"
+            && n3 == PhraseNumber_t{3, 9, 15}
+            && n2 == PhraseNumber_t{2, 6, 9}
+            && n1 == PhraseNumber_t{1, 3, 4}
+            && n0 == PhraseNumber_t{0, 0, 0};
+    });
+
+    ut.set_test("Remove phrase middle", [&]() {
+        tphrase::Generator::set_random_function(get_sequence_random_func({
+            0.9, 0.9, 0.9, 0.9, 0.9, 0.9
+        }));
+        tphrase::Generator ph;
+        const auto id1 = ph.add(R"(main = "1" 2 | 2 | 3)");
+        const auto id2 = ph.add(R"(main = A | "B" 3 | C)");
+        const auto id3 = ph.add(R"(main = あ | い | "う" 4)");
+        const auto r3 = ph.generate();
+        const PhraseNumber_t n3{ph};
+        const auto del3 = ph.remove(id2);
+        const auto del32 = ph.remove(id2);
+        const auto r2 = ph.generate();
+        const PhraseNumber_t n2{ph};
+        const auto del2 = ph.remove(id1);
+        const auto del22 = ph.remove(id1);
+        const auto r1 = ph.generate();
+        const PhraseNumber_t n1{ph};
+        const auto del1 = ph.remove(id3);
+        const auto del12 = ph.remove(id3);
+        const auto r0 = ph.generate();
+        const PhraseNumber_t n0{ph};
+        return del1 && del2 && del3
+            && !del32 && !del22 && !del12
+            && id1 && id2 && id3
+            && r3 == "う" && r2 == "う" && r1 == "う" && r0 == "nil"
+            && n3 == PhraseNumber_t{3, 9, 15}
+            && n2 == PhraseNumber_t{2, 6, 10}
+            && n1 == PhraseNumber_t{1, 3, 6}
+            && n0 == PhraseNumber_t{0, 0, 0};
     });
 
     ut.set_test("Get and clear error message", [&]() {

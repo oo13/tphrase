@@ -43,6 +43,7 @@ incfile_common = [
     'include/tphrase/common/ext_context.h',
     'include/tphrase/common/gsub_func.h',
     'include/tphrase/common/random_func.h',
+    'include/tphrase/common/syntax_id.h',
 ]
 
 
