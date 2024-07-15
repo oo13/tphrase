@@ -53,7 +53,7 @@ namespace tphrase {
         /** Is the position at the end?
             \return the position is at the end.
         */
-        virtual bool is_end() const noexcept = 0;
+        virtual bool is_end() const = 0;
     };
 
 #ifdef __cpp_concepts
@@ -92,14 +92,14 @@ namespace tphrase {
             \param [inout] e The end iterator. (Universal reference; accessed by the reference or moved)
         */
         template<typename T2, typename S2> REQUIRES_CharInputIteratorConcept(T2, S2)
-        InputIterator(T2 &&p, S2 &&e) noexcept;
+        InputIterator(T2 &&p, S2 &&e);
         InputIterator() = delete;
         InputIterator(const InputIterator &a) = delete;
         InputIterator<T, S> &operator=(const InputIterator &a) = delete;
         virtual ~InputIterator() noexcept;
         virtual char operator*();
         virtual InputIterator<T, S> &operator++();
-        virtual bool is_end() const noexcept;
+        virtual bool is_end() const;
 
     private:
         TempRefHolder<typename std::remove_reference<T>::type> cur; /**< The current position */
@@ -108,7 +108,7 @@ namespace tphrase {
 
     template<typename T, typename S> REQUIRES_CharInputIteratorConcept(T, S)
     template<typename T2, typename S2> REQUIRES_CharInputIteratorConcept(T2, S2)
-    InputIterator<T, S>::InputIterator(T2 &&p, S2 &&e) noexcept
+    InputIterator<T, S>::InputIterator(T2 &&p, S2 &&e)
         : cur{std::forward<T2>(p)}, end{std::forward<S2>(e)}
     {
     }
@@ -132,7 +132,7 @@ namespace tphrase {
     }
 
     template<typename T, typename S> REQUIRES_CharInputIteratorConcept(T, S)
-    bool InputIterator<T, S>::is_end() const noexcept
+    bool InputIterator<T, S>::is_end() const
     {
         return *cur == *end;
     }

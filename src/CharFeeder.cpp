@@ -27,7 +27,7 @@
 #include "tphrase/common/InputIterator.h"
 
 namespace tphrase {
-    CharFeeder::CharFeeder(InputIteratorBase &it) noexcept
+    CharFeeder::CharFeeder(InputIteratorBase &it)
         : next_pos(&it),
           num_c(0),
           line(1),

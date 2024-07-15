@@ -276,7 +276,7 @@ namespace tphrase {
         /** The move constructor.
             \param [inout] a The source. (moved)
         */
-        Syntax(Syntax &&a) noexcept;
+        Syntax(Syntax &&a);
 
         /** The destructor. */
         ~Syntax() noexcept;
@@ -289,7 +289,7 @@ namespace tphrase {
         /** The move constructor.
             \param [inout] a The source. (moved)
         */
-        Syntax &operator=(Syntax &&a) noexcept;
+        Syntax &operator=(Syntax &&a);
 
         /** Add the assignments from a source Syntax.
             \param [in] a The source syntax.

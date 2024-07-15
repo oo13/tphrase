@@ -96,7 +96,7 @@ namespace tphrase {
     {
     }
 
-    Syntax::Syntax(Syntax &&a) noexcept
+    Syntax::Syntax(Syntax &&a)
         : pimpl{a.pimpl}
     {
         a.pimpl = nullptr;
@@ -114,7 +114,7 @@ namespace tphrase {
         return *this;
     }
 
-    Syntax &Syntax::operator=(Syntax &&a) noexcept
+    Syntax &Syntax::operator=(Syntax &&a)
     {
         delete pimpl;
         pimpl = a.pimpl;

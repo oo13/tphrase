@@ -41,7 +41,7 @@ namespace tphrase {
        /** The constructor.
             \param [inout] it An input iterator.
         */
-        CharFeeder(InputIteratorBase &it) noexcept;
+        CharFeeder(InputIteratorBase &it);
         CharFeeder(const CharFeeder &a) = delete;
         CharFeeder &operator=(const CharFeeder &a) = delete;
 
@@ -49,21 +49,21 @@ namespace tphrase {
             \return The character.
             \note return '\0' if is_end() is true.
         */
-        char getc() const noexcept;
+        char getc() const;
         /** Get the character at the next position.
             \return The character at the next position.
             \note return '\0' if next_is_end() is true.
         */
-        char get_nextc() const noexcept;
+        char get_nextc() const;
 
         /** Is the position at the end?
             \return the position is at the end.
         */
-        bool is_end() const noexcept;
+        bool is_end() const;
         /** Is the next position at the end?
             \return the next position is at the end.
         */
-        bool next_is_end() const noexcept;
+        bool next_is_end() const;
 
         /** Step forward.
             \note It does nothing if is_end() is true.
@@ -73,12 +73,12 @@ namespace tphrase {
         /** Get the line number of the current position.
             \return The line number.
         */
-        std::size_t get_line_number() const noexcept;
+        std::size_t get_line_number() const;
         /** Get the column number of the current position.
             \return The column number.
             \note The unit of the column number is byte.
         */
-        std::size_t get_column_number() const noexcept;
+        std::size_t get_column_number() const;
 
     private:
         /** The number of the lookahead character. */
@@ -95,37 +95,37 @@ namespace tphrase {
     };
 
     inline
-    char CharFeeder::getc() const noexcept
+    char CharFeeder::getc() const
     {
         return c[0];
     }
 
     inline
-    char CharFeeder::get_nextc() const noexcept
+    char CharFeeder::get_nextc() const
     {
         return c[1];
     }
 
     inline
-    bool CharFeeder::is_end() const noexcept
+    bool CharFeeder::is_end() const
     {
         return num_c == 0;
     }
 
     inline
-    bool CharFeeder::next_is_end() const noexcept
+    bool CharFeeder::next_is_end() const
     {
         return num_c == 1;
     }
 
     inline
-    std::size_t CharFeeder::get_line_number() const noexcept
+    std::size_t CharFeeder::get_line_number() const
     {
         return line;
     }
 
     inline
-    std::size_t CharFeeder::get_column_number() const noexcept
+    std::size_t CharFeeder::get_column_number() const
     {
         return column;
     }
