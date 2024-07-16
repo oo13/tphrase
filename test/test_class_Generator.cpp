@@ -666,7 +666,7 @@ std::size_t test_class_Generator()
             && add_result;
     });
 
-    ut.set_test("Add syntax (copy) wiht error#1", [&]() {
+    ut.set_test("Add syntax (copy) with error#1", [&]() {
         tphrase::Generator ph{R"(
             main = {= X | Y | Z } | {A} | {B}
             A = A1 | A2 | A3
@@ -687,7 +687,7 @@ std::size_t test_class_Generator()
             && !add_result;
     });
 
-    ut.set_test("Add syntax (copy) wiht error#2 and not same ID", [&]() {
+    ut.set_test("Add syntax (copy) with error#2 and not same ID", [&]() {
         tphrase::Generator ph{R"(
             main = {= X | Y | Z } | {A} | {B}
             A = A1 | A2 | A3
@@ -731,7 +731,7 @@ std::size_t test_class_Generator()
             && add_result;
     });
 
-    ut.set_test("Add syntax (move) wiht error#1", [&]() {
+    ut.set_test("Add syntax (move) with error#1", [&]() {
         tphrase::Generator ph{R"(
             main = {= X | Y | Z } | {A} | {B}
             A = A1 | A2 | A3
@@ -751,7 +751,7 @@ std::size_t test_class_Generator()
             && !add_result;
     });
 
-    ut.set_test("Add syntax (move) wiht error#2 and not same ID", [&]() {
+    ut.set_test("Add syntax (move) with error#2 and not same ID", [&]() {
         tphrase::Generator ph{R"(
             main = {= X | Y | Z } | {A} | {B}
             A = A1 | A2 | A3
@@ -819,7 +819,7 @@ std::size_t test_class_Generator()
             && !add_result;
     });
 
-    ut.set_test("Add syntax (copy) wiht start condition, error#2, and not same ID", [&]() {
+    ut.set_test("Add syntax (copy) with start condition, error#2, and not same ID", [&]() {
         tphrase::Generator ph{R"(
             main = {= X | Y | Z } | {A} | {B}
             A = A1 | A2 | A3
@@ -883,7 +883,7 @@ std::size_t test_class_Generator()
             && !add_result;
     });
 
-    ut.set_test("Add syntax (move) wiht start condition, error#2, and not same ID", [&]() {
+    ut.set_test("Add syntax (move) with start condition, error#2, and not same ID", [&]() {
         tphrase::Generator ph{R"(
             main = {= X | Y | Z } | {A} | {B}
             A = A1 | A2 | A3
@@ -1082,6 +1082,43 @@ std::size_t test_class_Generator()
             && n2 == PhraseNumber_t{2, 6, 10}
             && n1 == PhraseNumber_t{1, 3, 6}
             && n0 == PhraseNumber_t{0, 0, 0};
+    });
+
+    ut.set_test("Remove and add phrase", [&]() {
+        tphrase::Generator::set_random_function(get_sequence_random_func({
+            0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9
+        }));
+        tphrase::Generator ph;
+        const auto id1 = ph.add(R"(main = 1)");
+        const auto id2 = ph.add(R"(main = A | B)");
+        const auto id3 = ph.add(R"(main = あ | い | う)");
+        const auto r3{ph.generate()};
+        const PhraseNumber_t n3{ph};
+        const auto del2 = ph.remove(id2);
+        const auto r3d2{ph.generate()};
+        const PhraseNumber_t n3d2{ph};
+        const auto id4 = ph.add(R"(main = 11 | 12 | 13 | 14)");
+        const auto r4{ph.generate()};
+        const PhraseNumber_t n4{ph};
+        const auto del4 = ph.remove(id4);
+        const auto r4d4{ph.generate()};
+        const PhraseNumber_t n4d4{ph};
+        const auto id5 = ph.add(R"(main = AA | BB | CC | DD | EE)");
+        const auto r5{ph.generate()};
+        const PhraseNumber_t n5{ph};
+        return del2 && del4
+            && id1 && id2 && id3 && id4 && id5
+            && id1 != id2 && id1 != id3 && id1 != id4 && id1 != id5
+            && id2 != id3
+            && id3 != id4 && id3 != id5
+            && r3 == "う" && r3d2 == "う"
+            && r4 == "14" && r4d4 == "う"
+            && r5 == "EE"
+            && n3 == PhraseNumber_t{3, 6, 6}
+            && n3d2 == PhraseNumber_t{2, 4, 4}
+            && n4 == PhraseNumber_t{3, 8, 8}
+            && n4d4 == PhraseNumber_t{2, 4, 4}
+            && n5 == PhraseNumber_t{3, 9, 9};
     });
 
     ut.set_test("Get and clear error message", [&]() {

@@ -21,6 +21,7 @@
     \endparblock
 */
 
+#include <algorithm>
 #include <utility>
 
 #include "DataPhrase.h"
@@ -29,7 +30,7 @@
 
 namespace tphrase {
     DataPhrase::DataPhrase()
-        : syntaxes{}, weights{}, equalized_chance{false}
+        : syntaxes{}, weights{}, equalized_chance{false}, ids{}
     {
     }
 
@@ -42,16 +43,7 @@ namespace tphrase {
                                const std::string &start_condition,
                                std::string &err_msg)
     {
-        DataSyntax add_syntax{syntax};
-        add_syntax.bind_syntax(start_condition, err_msg);
-        if (!add_syntax.is_valid()) {
-            return 0;
-        }
-
-        syntaxes.emplace_back(std::move(add_syntax));
-        weights.emplace_back(get_weight() + syntaxes.back().get_weight());
-
-        return syntaxes.back().get_syntax_id();
+        return add(DataSyntax{syntax}, start_condition, err_msg);
     }
 
     SyntaxID_t DataPhrase::add(DataSyntax &&syntax,
@@ -65,29 +57,35 @@ namespace tphrase {
 
         syntaxes.emplace_back(std::move(syntax));
         weights.emplace_back(get_weight() + syntaxes.back().get_weight());
+        if (ids.empty()) {
+            ids.emplace_back(1);
+        } else {
+            ids.emplace_back(ids.back() + 1);
+        }
 
-        return syntaxes.back().get_syntax_id();
+        return ids.back();
     }
 
     bool DataPhrase::remove(SyntaxID_t id)
     {
-        bool removed{false};
-        for (auto it = syntaxes.cbegin(); it != syntaxes.cend(); ++it) {
-            if (it->get_syntax_id() == id) {
-                syntaxes.erase(it);
-                removed = true;
-                break;
-            }
+        const auto it{std::lower_bound(ids.cbegin(), ids.cend(), id)};
+        if (it == ids.end() || *it != id) {
+            return false;
         }
-        if (removed) {
-            weights.pop_back();
-            double sum{0.0};
-            for (std::size_t i=0; i<weights.size(); ++i) {
-                sum += syntaxes[i].get_weight();
-                weights[i] = sum;
-            }
+
+        std::size_t idx = it - ids.begin();
+        ids.erase(it);
+        syntaxes.erase(syntaxes.begin() + idx);
+        weights.pop_back();
+        double sum{0.0};
+        if (idx >= 1) {
+            sum = weights[idx - 1];
         }
-        return removed;
+        for ( ; idx < syntaxes.size(); ++idx) {
+            sum += syntaxes[idx].get_weight();
+            weights[idx] = sum;
+        }
+        return true;
     }
 
     void DataPhrase::clear()

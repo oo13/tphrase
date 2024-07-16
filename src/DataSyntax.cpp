@@ -21,56 +21,35 @@
     \endparblock
 */
 
-#include <atomic>
 #include <limits>
 #include <stdexcept>
 #include <utility>
 
 #include "DataSyntax.h"
 
-namespace {
-    /** The seed for the syntax ID. */
-    std::atomic<tphrase::SyntaxID_t> syntax_id_seed{1};
-
-    /** Get the new value that can be used as syntax ID.
-        \return New ID.
-    */
-    tphrase::SyntaxID_t get_new_syntax_id()
-    {
-        tphrase::SyntaxID_t new_id{syntax_id_seed++};
-        if (!new_id) {
-            throw std::runtime_error("The syntax ID must not be equivalent to false.");
-        }
-        return new_id;
-    }
-}
-
 namespace tphrase {
     DataSyntax::DataSyntax()
         : assignments{},
           start_it{assignments.end()},
-          binding_epoch{0},
-          id{0}
+          binding_epoch{0}
     {
     }
 
     DataSyntax::DataSyntax(const DataSyntax &a)
         : assignments{a.assignments},
           start_it{assignments.end()},
-          binding_epoch{0},
-          id{a.id}
+          binding_epoch{0}
     {
         if (a.start_it != a.assignments.end()) {
             std::string err_msg;
-            bind_syntax_preserve_id(a.start_it->first, err_msg); // It should not generate any error messages.
+            bind_syntax(a.start_it->first, err_msg); // It should not generate any error messages.
         }
     }
 
     DataSyntax::DataSyntax(DataSyntax &&a)
         : assignments{},
           start_it{a.start_it},
-          binding_epoch{a.binding_epoch},
-          id{a.id}
+          binding_epoch{a.binding_epoch}
     {
         // swap() doesn't invalidate any iterators except end().
         const bool is_end{a.start_it == a.assignments.end()};
@@ -85,10 +64,9 @@ namespace tphrase {
         assignments = a.assignments;
         start_it = assignments.end();
         binding_epoch = 0;
-        id = a.id;
         if (a.start_it != a.assignments.end()) {
             std::string err_msg;
-            bind_syntax_preserve_id(a.start_it->first, err_msg); // It should not generate any error messages.
+            bind_syntax(a.start_it->first, err_msg); // It should not generate any error messages.
         }
         return *this;
     }
@@ -104,7 +82,6 @@ namespace tphrase {
             start_it = a.start_it;
         }
         binding_epoch = a.binding_epoch;
-        id = a.id;
         return *this;
     }
 
@@ -160,7 +137,6 @@ namespace tphrase {
                          std::string &err_msg)
     {
         start_it = assignments.end();
-        id = 0;
         auto it{assignments.find(nonterminal)};
         if (it == assignments.end()) {
             assignments.emplace(std::move(nonterminal), std::move(rule));
@@ -177,7 +153,6 @@ namespace tphrase {
     void DataSyntax::add(DataSyntax &&syntax, std::string &err_msg)
     {
         start_it = assignments.end();
-        id = 0;
         for (auto &it : syntax.assignments) {
             auto found{assignments.find(it.first)};
             if (found == assignments.end()) {
@@ -192,38 +167,6 @@ namespace tphrase {
     }
 
     bool DataSyntax::bind_syntax(const std::string &start_condition, std::string &err_msg)
-    {
-        id = 0;
-        const bool is_bound{bind_syntax_preserve_id(start_condition, err_msg)};
-        if (is_bound) {
-            id = get_new_syntax_id();
-        }
-        return is_bound;
-    }
-
-    void DataSyntax::fix_local_nonterminal(std::string &err_msg)
-    {
-        for (auto &it : assignments) {
-            it.second.fix_local_nonterminal(*this, err_msg);
-        }
-        for (auto it = assignments.begin(); it != assignments.end(); ) {
-            if (is_local_nonterminal(it->first)) {
-                it = assignments.erase(it);
-            } else {
-                ++it;
-            }
-        }
-    }
-
-    void DataSyntax::clear()
-    {
-        assignments.clear();
-        start_it = assignments.end();
-        binding_epoch = 0;
-        id = 0;
-    }
-
-    bool DataSyntax::bind_syntax_preserve_id(const std::string &start_condition, std::string &err_msg)
     {
         auto it{assignments.find(start_condition)};
         if (it != assignments.end()) {
@@ -251,5 +194,26 @@ namespace tphrase {
             start_it = assignments.end();
         }
         return is_bound;
+    }
+
+    void DataSyntax::fix_local_nonterminal(std::string &err_msg)
+    {
+        for (auto &it : assignments) {
+            it.second.fix_local_nonterminal(*this, err_msg);
+        }
+        for (auto it = assignments.begin(); it != assignments.end(); ) {
+            if (is_local_nonterminal(it->first)) {
+                it = assignments.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+
+    void DataSyntax::clear()
+    {
+        assignments.clear();
+        start_it = assignments.end();
+        binding_epoch = 0;
     }
 }
