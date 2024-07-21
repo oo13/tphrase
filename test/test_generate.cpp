@@ -380,11 +380,13 @@ std::size_t test_generate()
             sub = B
         )");
         main.add(sub);
+        const auto err_msg{main.get_error_message()};
+        main.clear_error_message();
         tphrase::Generator ph(main);
         return ph.generate() == "A"
             && sub.get_error_message().empty()
-            && main.get_error_message() == "The nonterminal \"sub\" is already defined.\n"
-            && ph.get_error_message() == "The nonterminal \"sub\" is already defined.\n";
+            && err_msg == "The nonterminal \"sub\" is already defined.\n"
+            && ph.get_error_message().empty();
     });
 
     ut.set_test("Don't Overwrite Local Nonterminal", [&]() {
@@ -464,6 +466,8 @@ std::size_t test_generate()
         )"};
         tphrase::Generator ph1{syntax};
         syntax.add("CB = ''");
+        const auto err_msg{syntax.get_error_message()};
+        syntax.clear_error_message();
         tphrase::Generator ph2{syntax};
         return ph1.generate() == "A1 A2 1"
             && ph2.generate() == "A1 A2 1"
@@ -471,9 +475,9 @@ std::size_t test_generate()
             && ph2.get_combination_number() == 17 + 2 + 17 + 4 + 17 + 4
             && ph1.get_weight() == 28 + 2 + 28 + 5 + 28 + 8
             && ph2.get_weight() == 26 + 2 + 26 + 5 + 26 + 6
-            && syntax.get_error_message() == "The nonterminal \"CB\" is already defined.\n"
+            && err_msg == "The nonterminal \"CB\" is already defined.\n"
             && ph1.get_error_message().empty()
-            && ph2.get_error_message() == "The nonterminal \"CB\" is already defined.\n";
+            && ph2.get_error_message().empty();
     });
 
     ut.set_test("Nonterminal with weight", [&]() {

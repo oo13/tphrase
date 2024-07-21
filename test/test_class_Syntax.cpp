@@ -140,9 +140,11 @@ std::size_t test_class_Syntax()
             Z = Z1 | Z2 | Z3
         )"};
         const bool good = syntax1.add(syntax2);
+        const auto err_msg{syntax1.get_error_message()};
+        syntax1.clear_error_message();
         tphrase::Generator ph{syntax1};
         auto r = ph.generate();
-        return syntax1.get_error_message().find("A text is expected.") != std::string::npos
+        return err_msg.find("A text is expected.") != std::string::npos
             && good
             && r == "X";
     });
@@ -182,7 +184,7 @@ std::size_t test_class_Syntax()
         const bool good = syntax1.add(syntax2);
         tphrase::Generator ph{syntax1};
         auto r = ph.generate();
-        return r == "X"
+        return r == "nil"
             && syntax1.get_error_message() == "The nonterminal \"main\" is already defined.\n"
             && ph.get_error_message() == "The nonterminal \"main\" is already defined.\n"
             && good;
@@ -202,9 +204,11 @@ std::size_t test_class_Syntax()
             Z = Z1 | Z2 | Z3
         )"};
         const bool good = syntax1.add(std::move(syntax2));
+        const auto err_msg{syntax1.get_error_message()};
+        syntax1.clear_error_message();
         tphrase::Generator ph{syntax1};
         auto r = ph.generate();
-        return syntax1.get_error_message().find("A text is expected.") != std::string::npos
+        return err_msg.find("A text is expected.") != std::string::npos
             && good
             && r == "X";
     });
@@ -244,7 +248,7 @@ std::size_t test_class_Syntax()
         const bool good = syntax1.add(std::move(syntax2));
         tphrase::Generator ph{syntax1};
         auto r = ph.generate();
-        return r == "X"
+        return r == "nil"
             && syntax1.get_error_message() == "The nonterminal \"main\" is already defined.\n"
             && ph.get_error_message() == "The nonterminal \"main\" is already defined.\n"
             && good;
@@ -308,7 +312,7 @@ std::size_t test_class_Syntax()
                                      std::istreambuf_iterator<char>{});
         tphrase::Generator ph{syntax};
         auto r = ph.generate();
-        return r == "X"
+        return r == "nil"
             && syntax.get_error_message() == "The nonterminal \"main\" is already defined.\n"
             && ph.get_error_message() == "The nonterminal \"main\" is already defined.\n"
             && good;
@@ -332,7 +336,7 @@ std::size_t test_class_Syntax()
                                      std::istream_iterator<char>{});
         tphrase::Generator ph{syntax};
         auto r = ph.generate();
-        return r == "X"
+        return r == "nil"
             && syntax.get_error_message() == "The nonterminal \"main\" is already defined.\n"
             && ph.get_error_message() == "The nonterminal \"main\" is already defined.\n"
             && good;
@@ -373,7 +377,7 @@ std::size_t test_class_Syntax()
         const bool good = syntax.add(s);
         tphrase::Generator ph{syntax};
         auto r = ph.generate();
-        return r == "X"
+        return r == "nil"
             && syntax.get_error_message() == "The nonterminal \"main\" is already defined.\n"
             && ph.get_error_message() == "The nonterminal \"main\" is already defined.\n"
             && good;
@@ -412,7 +416,7 @@ std::size_t test_class_Syntax()
         )");
         tphrase::Generator ph{syntax};
         auto r = ph.generate();
-        return r == "X"
+        return r == "nil"
             && syntax.get_error_message() == "The nonterminal \"main\" is already defined.\n"
             && ph.get_error_message() == "The nonterminal \"main\" is already defined.\n"
             && good;

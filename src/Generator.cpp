@@ -94,17 +94,21 @@ namespace tphrase {
                          const std::string &start_condition)
         : pimpl{new Impl{syntax.get_error_message()}}
     {
-        pimpl->data.add(syntax.get_syntax_data(),
-                        start_condition,
-                        pimpl->err_msg);
+        if (pimpl->err_msg.empty()) {
+            pimpl->data.add(syntax.get_syntax_data(),
+                            start_condition,
+                            pimpl->err_msg);
+        }
     }
 
     Generator::Generator(Syntax &&syntax, const std::string &start_condition)
         : pimpl{new Impl{std::move(syntax).move_error_message()}}
     {
-        pimpl->data.add(std::move(syntax).move_syntax_data(),
-                        start_condition,
-                        pimpl->err_msg);
+        if (pimpl->err_msg.empty()) {
+            pimpl->data.add(std::move(syntax).move_syntax_data(),
+                            start_condition,
+                            pimpl->err_msg);
+        }
     }
 
     Generator::Generator(const Generator &a)
