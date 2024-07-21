@@ -26,6 +26,7 @@
 
 #include <cstddef>
 #include <string>
+#include <vector>
 
 #include "tphrase/common/ext_context.h"
 #include "DataOptions.h"
@@ -104,7 +105,7 @@ namespace tphrase {
         */
         bool bind_syntax(DataSyntax &syntax,
                          int epoch,
-                         std::string &err_msg);
+                         std::vector<std::string> &err_msg);
 
         /** Fix the reference to the local nonterminal.
             \param [inout] syntax The syntax to be fixed.
@@ -112,7 +113,7 @@ namespace tphrase {
             \note An error is caused if the local nonterminal that is referred by a production rule doesn't exists.
         */
         void fix_local_nonterminal(DataSyntax &syntax,
-                                   std::string &err_msg);
+                                   std::vector<std::string> &err_msg);
 
         /** Reset the binding epoch. */
         void reset_binding_epoch();
@@ -139,7 +140,7 @@ namespace tphrase {
     inline
     void
     DataProductionRule::fix_local_nonterminal(DataSyntax &syntax,
-                                              std::string &err_msg)
+                                              std::vector<std::string> &err_msg)
     {
         return options.fix_local_nonterminal(syntax, err_msg);
     }

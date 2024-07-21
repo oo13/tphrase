@@ -41,7 +41,7 @@ namespace tphrase {
 
     /** The type of the private data of the class Generator. */
     struct Generator::Impl {
-        std::string err_msg; /**< The holder of the error messages. */
+        std::vector<std::string> err_msg; /**< The holder of the error messages. */
         DataPhrase data; /**< The data structure for the phrase generator. */
 
         /** The default constructor. */
@@ -49,11 +49,11 @@ namespace tphrase {
         /** The constructor to copy error messages.
             \param [in] err The error messages.
         */
-        Impl(const std::string &err);
+        Impl(const std::vector<std::string> &err);
         /** The constructor to move error messages.
             \param [inout] err The error messages. (moved)
         */
-        Impl(std::string &&err);
+        Impl(std::vector<std::string> &&err);
         /** The copy constructor.
             \param [in] a The source.
         */
@@ -65,12 +65,12 @@ namespace tphrase {
         Impl &operator=(const Impl &a) = default;
     };
 
-    Generator::Impl::Impl(const std::string &err)
+    Generator::Impl::Impl(const std::vector<std::string> &err)
         : err_msg{err}, data{}
     {
     }
 
-    Generator::Impl::Impl(std::string &&err)
+    Generator::Impl::Impl(std::vector<std::string> &&err)
         : err_msg{std::move(err)}, data{}
     {
     }
@@ -166,9 +166,11 @@ namespace tphrase {
     SyntaxID_t Generator::add(const Syntax &syntax,
                               const std::string &start_condition)
     {
-        const std::size_t prev_len{pimpl->err_msg.size()};
-        pimpl->err_msg += syntax.get_error_message();
-        if (prev_len != pimpl->err_msg.size()) {
+        const auto &add_err = syntax.get_error_message();
+        if (!add_err.empty()) {
+            for (auto &err : add_err) {
+                pimpl->err_msg.emplace_back(err);
+            }
             return 0;
         }
         return pimpl->data.add(syntax.get_syntax_data(),
@@ -179,9 +181,11 @@ namespace tphrase {
     SyntaxID_t Generator::add(Syntax &&syntax,
                               const std::string &start_condition)
     {
-        const std::size_t prev_len{pimpl->err_msg.size()};
-        pimpl->err_msg += std::move(syntax).move_error_message();
-        if (prev_len != pimpl->err_msg.size()) {
+        const auto &&add_err = std::move(syntax).move_error_message();
+        if (!add_err.empty()) {
+            for (auto &&err : add_err) {
+                pimpl->err_msg.emplace_back(std::move(err));
+            }
             return 0;
         }
         return pimpl->data.add(std::move(syntax).move_syntax_data(),
@@ -194,7 +198,7 @@ namespace tphrase {
         return pimpl->data.remove(id);
     }
 
-    const std::string &Generator::get_error_message() const
+    const std::vector<std::string> &Generator::get_error_message() const
     {
         return pimpl->err_msg;
     }

@@ -41,14 +41,14 @@ namespace tphrase {
 
     SyntaxID_t DataPhrase::add(const DataSyntax &syntax,
                                const std::string &start_condition,
-                               std::string &err_msg)
+                               std::vector<std::string> &err_msg)
     {
         return add(DataSyntax{syntax}, start_condition, err_msg);
     }
 
     SyntaxID_t DataPhrase::add(DataSyntax &&syntax,
                                const std::string &start_condition,
-                               std::string &err_msg)
+                               std::vector<std::string> &err_msg)
     {
         syntax.bind_syntax(start_condition, err_msg);
         if (!syntax.is_valid()) {

@@ -65,7 +65,7 @@ namespace {
 namespace tphrase {
 
     extern
-    DataSyntax parse(InputIteratorBase &p, std::string &err_msg)
+    DataSyntax parse(InputIteratorBase &p, std::vector<std::string> &err_msg)
     {
         DataSyntax syntax;
         CharFeeder it{p};
@@ -75,7 +75,7 @@ namespace tphrase {
             try {
                 parse_assignment(it, syntax);
             } catch (const ParseError &e) {
-                err_msg += e.what();
+                err_msg.emplace_back(e.what());
                 // Recovering from the error
                 bool cont_line{false};
                 for (; !it.is_end(); it.next()) {
@@ -112,7 +112,6 @@ namespace {
         e += std::to_string(it.get_column_number());
         e += ": ";
         e += msg;
-        e += '\n';
         throw ParseError(e);
     }
 

@@ -199,9 +199,10 @@ Hello World.)");
             main = text1 | "text2" .
         )");
         const auto r = ph.generate();
-        const std::string err_msg{ph.get_error_message()};
+        const std::vector<std::string> err_msg{ph.get_error_message()};
         return r == "nil"
-            && err_msg.find("A number is expected. (\".\" is not a number.)") != err_msg.npos;
+            && err_msg.size() == 1
+            && err_msg[0].find("A number is expected. (\".\" is not a number.)") != std::string::npos;
     });
 
     ut.set_test("Text Non-quoted", [&]() {
@@ -358,8 +359,10 @@ Hello World.)");
         ph.add(R"(
             main = 1 | 2 | 3 ~ ~A~B~1)");
         const auto r = ph.generate();
-        const std::string err_msg{ph.get_error_message()};
-        return r == "nil" && err_msg.find("The end of the text or \"\\n\" is expected.") != err_msg.npos;
+        const std::vector<std::string> err_msg{ph.get_error_message()};
+        return r == "nil"
+            && err_msg.size() == 1
+            && err_msg[0].find("The end of the text or \"\\n\" is expected.") != std::string::npos;
     });
 
     ut.set_test("Gsub separator error", [&]() {
@@ -367,8 +370,10 @@ Hello World.)");
         ph.add(R"(
             main = 1 | 2 | 3 ~ あAあBあ)");
         const auto r = ph.generate();
-        const std::string err_msg{ph.get_error_message()};
-        return r == "nil" && err_msg.find("The separator must be a 7 bit character.") != err_msg.npos;
+        const std::vector<std::string> err_msg{ph.get_error_message()};
+        return r == "nil"
+            && err_msg.size() == 1
+            && err_msg[0].find("The separator must be a 7 bit character.") != std::string::npos;
     });
 
     ut.set_test("Parse Error in the Last Line", [&]() {
@@ -376,8 +381,10 @@ Hello World.)");
         ph.add(R"(
             main = 1 | 2 | 3 ~ /A//+)");
         const auto r = ph.generate();
-        const std::string err_msg{ph.get_error_message()};
-        return r == "nil" && err_msg.find("The end of the text or \"\\n\" is expected.") != err_msg.npos;
+        const std::vector<std::string> err_msg{ph.get_error_message()};
+        return r == "nil"
+            && err_msg.size() == 1
+            && err_msg[0].find("The end of the text or \"\\n\" is expected.") != std::string::npos;
     });
 
     ut.set_test("Recursive Expansion Error", [&]() {
@@ -389,8 +396,10 @@ Hello World.)");
             C = {B}
         )");
         const auto r = ph.generate();
-        const std::string err_msg{ph.get_error_message()};
-        return r == "nil" && err_msg.find("Recursive expansion of \"B\" is detected.") != err_msg.npos;
+        const std::vector<std::string> err_msg{ph.get_error_message()};
+        return r == "nil"
+            && err_msg.size() == 1
+            && err_msg[0].find("Recursive expansion of \"B\" is detected.") != std::string::npos;
     });
 
     ut.set_test("No Local Nonterminal Error", [&]() {
@@ -401,8 +410,10 @@ Hello World.)");
             B = C
         )");
         const auto r = ph.generate();
-        const std::string err_msg{ph.get_error_message()};
-        return r == "nil" && err_msg.find("The local nonterminal \"_B\" is not found.") != err_msg.npos;
+        const std::vector<std::string> err_msg{ph.get_error_message()};
+        return r == "nil"
+            && err_msg.size() == 1
+            && err_msg[0].find("The local nonterminal \"_B\" is not found.") != std::string::npos;
     });
 
     ut.set_test("Nonterminal with weight#1", [&]() {
@@ -446,9 +457,10 @@ Hello World.)");
             A = 4 | 5 | 6
         )");
         const auto r = ph.generate();
-        const std::string err_msg{ph.get_error_message()};
+        const std::vector<std::string> err_msg{ph.get_error_message()};
         return r == "nil"
-            && err_msg.find("The nonterminal \"A\" is already defined.\n") != err_msg.npos;
+            && err_msg.size() == 1
+            && err_msg[0].find("The nonterminal \"A\" is already defined.") != std::string::npos;
     });
 
     return ut.run();

@@ -115,14 +115,14 @@ namespace tphrase {
         */
         void bind_syntax(DataSyntax &syntax,
                          int epoch,
-                         std::string &err_msg);
+                         std::vector<std::string> &err_msg);
 
         /** Fix the reference to the local nonterminal.
             \param [inout] syntax The syntax to be fixed.
             \param [inout] err_msg The error messages are added if some errors are detected.
             \note An error is caused if the local nonterminal that is referred by a production rule doesn't exists.
         */
-        void fix_local_nonterminal(DataSyntax& syntax, std::string &err_msg);
+        void fix_local_nonterminal(DataSyntax& syntax, std::vector<std::string> &err_msg);
 
     private:
         /** Copy another DataText to parts.

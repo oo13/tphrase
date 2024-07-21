@@ -69,7 +69,7 @@ namespace tphrase {
     void
     DataOptions::bind_syntax(DataSyntax &syntax,
                              int epoch,
-                             std::string &err_msg)
+                             std::vector<std::string> &err_msg)
     {
         double sum{0.0};
         auto it = weights.begin();
@@ -83,7 +83,7 @@ namespace tphrase {
 
     void
     DataOptions::fix_local_nonterminal(DataSyntax &syntax,
-                                       std::string &err_msg)
+                                       std::vector<std::string> &err_msg)
     {
         for (auto &t : texts) {
             t.fix_local_nonterminal(syntax, err_msg);

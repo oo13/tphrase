@@ -25,6 +25,7 @@
 #define TPHRASE_SRC_PARSE_H_
 
 #include <string>
+#include <vector>
 
 #include "tphrase/common/InputIterator.h"
 #include "DataSyntax.h"
@@ -36,7 +37,7 @@ namespace tphrase {
         \return The phrase syntax.
         \note The return value is bound on no syntax.
     */
-    extern DataSyntax parse(InputIteratorBase &p, std::string &err_msg);
+    extern DataSyntax parse(InputIteratorBase &p, std::vector<std::string> &err_msg);
 }
 
 #endif // TPHRASE_SRC_PARSE_H_

@@ -168,7 +168,7 @@ namespace tphrase {
     void
     DataText::bind_syntax(DataSyntax &syntax,
                           int epoch,
-                          std::string &err_msg)
+                          std::vector<std::string> &err_msg)
     {
         double tmp_weight{1.0};
         comb = 1;
@@ -180,9 +180,11 @@ namespace tphrase {
                     p.r = &syntax.get_production_rule(p.s);
                     if (!p.r->bind_syntax(syntax, epoch, err_msg)) {
                         p.r = nullptr;
-                        err_msg += "Recursive expansion of \"";
-                        err_msg += p.s;
-                        err_msg += "\" is detected.\n";
+
+                        std::string msg{"Recursive expansion of \""};
+                        msg += p.s;
+                        msg += "\" is detected.";
+                        err_msg.emplace_back(std::move(msg));
                     }
                 }
             }
@@ -198,7 +200,7 @@ namespace tphrase {
 
     void
     DataText::fix_local_nonterminal(DataSyntax &syntax,
-                                    std::string &err_msg)
+                                    std::vector<std::string> &err_msg)
     {
         for (auto &p : parts) {
             if (p.kind == Part_t::Kind_t::EXPANSION
@@ -206,9 +208,10 @@ namespace tphrase {
                 if (syntax.has_nonterminal(p.s)) {
                     p = Part_t(new DataProductionRule{syntax.get_production_rule(p.s)});
                 } else {
-                    err_msg += "The local nonterminal \"";
-                    err_msg += p.s;
-                    err_msg += "\" is not found.\n";
+                    std::string msg{"The local nonterminal \""};
+                    msg += p.s;
+                    msg += "\" is not found.";
+                    err_msg.emplace_back(std::move(msg));
                 }
             }
         }

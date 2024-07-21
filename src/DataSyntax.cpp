@@ -41,7 +41,7 @@ namespace tphrase {
           binding_epoch{0}
     {
         if (a.start_it != a.assignments.end()) {
-            std::string err_msg;
+            std::vector<std::string> err_msg;
             bind_syntax(a.start_it->first, err_msg); // It should not generate any error messages.
         }
     }
@@ -65,7 +65,7 @@ namespace tphrase {
         start_it = assignments.end();
         binding_epoch = 0;
         if (a.start_it != a.assignments.end()) {
-            std::string err_msg;
+            std::vector<std::string> err_msg;
             bind_syntax(a.start_it->first, err_msg); // It should not generate any error messages.
         }
         return *this;
@@ -142,7 +142,6 @@ namespace tphrase {
             assignments.emplace(std::move(nonterminal), std::move(rule));
             return true;
         } else {
-            // This is a parse error and it needs no newline.
             err_msg += "The nonterminal \"";
             err_msg += nonterminal;
             err_msg += "\" is already defined.";
@@ -150,7 +149,7 @@ namespace tphrase {
         }
     }
 
-    void DataSyntax::add(DataSyntax &&syntax, std::string &err_msg)
+    void DataSyntax::add(DataSyntax &&syntax, std::vector<std::string> &err_msg)
     {
         start_it = assignments.end();
         for (auto &it : syntax.assignments) {
@@ -159,23 +158,27 @@ namespace tphrase {
                 assignments.emplace(it.first, std::move(it.second));
             } else {
                 found->second = std::move(it.second);
-                err_msg += "The nonterminal \"";
-                err_msg += it.first;
-                err_msg += "\" is already defined.\n";
+
+                std::string msg{"The nonterminal \""};
+                msg += it.first;
+                msg += "\" is already defined.";
+                err_msg.emplace_back(std::move(msg));
             }
         }
     }
 
-    bool DataSyntax::bind_syntax(const std::string &start_condition, std::string &err_msg)
+    bool DataSyntax::bind_syntax(const std::string &start_condition, std::vector<std::string> &err_msg)
     {
         auto it{assignments.find(start_condition)};
         if (it != assignments.end()) {
             start_it = it;
         } else {
             start_it = assignments.end();
-            err_msg += "The nonterminal \"";
-            err_msg += start_condition;
-            err_msg += "\" doesn't exist.\n";
+
+            std::string msg{"The nonterminal \""};
+            msg += start_condition;
+            msg += "\" doesn't exist.";
+            err_msg.emplace_back(std::move(msg));
             return false;
         }
 
@@ -196,7 +199,7 @@ namespace tphrase {
         return is_bound;
     }
 
-    void DataSyntax::fix_local_nonterminal(std::string &err_msg)
+    void DataSyntax::fix_local_nonterminal(std::vector<std::string> &err_msg)
     {
         for (auto &it : assignments) {
             it.second.fix_local_nonterminal(*this, err_msg);

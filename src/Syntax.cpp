@@ -33,7 +33,7 @@ namespace tphrase {
 
     /** The type of the private data of the class Syntax. */
     struct Syntax::Impl {
-        std::string err_msg; /**< The holder of the error messages. */
+        std::vector<std::string> err_msg; /**< The holder of the error messages. */
         DataSyntax data; /**< The data structure for the phrase syntax. */
 
         /** The default constructor. */
@@ -125,9 +125,12 @@ namespace tphrase {
 
     bool Syntax::add(const Syntax &a)
     {
-        const bool good = a.pimpl->err_msg.empty();
+        const auto &add_err = a.pimpl->err_msg;
+        const bool good = add_err.empty();
         if (!good) {
-            pimpl->err_msg += a.pimpl->err_msg;
+            for (auto &err : add_err) {
+                pimpl->err_msg.emplace_back(err);
+            }
         }
         pimpl->data.add(DataSyntax(a.pimpl->data), pimpl->err_msg);
         return good;
@@ -135,9 +138,12 @@ namespace tphrase {
 
     bool Syntax::add(Syntax &&a)
     {
-        const bool good = a.pimpl->err_msg.empty();
+        const auto &&add_err = std::move(a.pimpl->err_msg);
+        const bool good = add_err.empty();
         if (!good) {
-            pimpl->err_msg += a.pimpl->err_msg;
+            for (auto &&err : add_err) {
+                pimpl->err_msg.emplace_back(std::move(err));
+            }
         }
         pimpl->data.add(std::move(a.pimpl->data), pimpl->err_msg);
         return good;
@@ -153,7 +159,7 @@ namespace tphrase {
         return add(src, src + std::strlen(src));
     }
 
-    const std::string &Syntax::get_error_message() const
+    const std::vector<std::string> &Syntax::get_error_message() const
     {
         return pimpl->err_msg;
     }
@@ -196,7 +202,7 @@ namespace tphrase {
         return std::move(pimpl->data);
     }
 
-    std::string &&Syntax::move_error_message() &&
+    std::vector<std::string> &&Syntax::move_error_message() &&
     {
         return std::move(pimpl->err_msg);
     }

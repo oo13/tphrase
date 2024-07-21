@@ -26,6 +26,7 @@
 
 #include <cstddef>
 #include <string>
+#include <vector>
 
 #include "common/InputIterator.h"
 #include "common/ext_context.h"
@@ -56,7 +57,7 @@ namespace tphrase {
             \note Only the phrase syntax that contains the nonterminal "main" can add.
             \note The recursive reference to a nonterminal is not allowed.
             \note All the errors in syntax is moved.
-            \note get_error_message() will return an empty string if no errors are detected and moved.
+            \note get_error_message() will return an empty vector if no errors are detected and moved.
             \note An empty generator is created if some errors are detected.
         */
         explicit Generator(Syntax &&syntax);
@@ -66,7 +67,7 @@ namespace tphrase {
             \note Only the phrase syntax that contains the start condition can add.
             \note The recursive reference to a nonterminal is not allowed.
             \note All the errors in syntax is added.
-            \note get_error_message() will return an empty string if no errors are detected.
+            \note get_error_message() will return an empty vector if no errors are detected.
             \note An empty generator is created if some errors are detected.
         */
         Generator(const Syntax &syntax, const std::string &start_condition);
@@ -76,7 +77,7 @@ namespace tphrase {
             \note Only the phrase syntax that contains the start condition can add.
             \note The recursive reference to a nonterminal is not allowed.
             \note All the errors in syntax is moved.
-            \note get_error_message() will return an empty string if no errors are detected and moved.
+            \note get_error_message() will return an empty vector if no errors are detected and moved.
             \note An empty generator is created if some errors are detected.
         */
         Generator(Syntax &&syntax, const std::string &start_condition);
@@ -177,7 +178,7 @@ namespace tphrase {
         /** Get the error messages.
             \return The error messages that have been generated after creating the instance or clearing the previous error messages.
         */
-        const std::string &get_error_message() const;
+        const std::vector<std::string> &get_error_message() const;
 
         /** Clear the previous error messages. */
         void clear_error_message();
@@ -253,7 +254,7 @@ namespace tphrase {
             \param [inout] end The end iterator. (Universal reference; accessed by the reference or moved)
             \note The instance doesn't use begin, end, and something referred by begin after returning from the constructor.
             \note Some parse errors may be detected if src has errors.
-            \note get_error_message() will return an empty string if no errors are detected.
+            \note get_error_message() will return an empty vector if no errors are detected.
             \note An empty phrase syntax is created if some errors are detected.
             \attention You want to use std::istreambuf_iterator, instead of std::istream_iterator, because it skips any white spaces by default. If you want to use an istream_iterator, you should configure the target input stream not to skip the spaces (stream.unsetf(std::ios_base::skipws)).
         */
@@ -262,14 +263,14 @@ namespace tphrase {
         /** The constructor to create an instance that has a syntax.
             \param [in] src The source text of a phrase syntax.
             \note Some parse errors may be detected if src has errors.
-            \note get_error_message() will return an empty string if no errors are detected.
+            \note get_error_message() will return an empty vector if no errors are detected.
             \note An empty phrase syntax is created if some errors are detected.
         */
         Syntax(const std::string &src);
         /** The constructor to create an instance that has a syntax.
             \param [in] src The source text of a phrase syntax.
             \note Some parse errors may be detected if src has errors.
-            \note get_error_message() will return an empty string if no errors are detected.
+            \note get_error_message() will return an empty vector if no errors are detected.
             \note An empty phrase syntax is created if some errors are detected.
         */
         Syntax(const char *src);
@@ -343,7 +344,7 @@ namespace tphrase {
         /** Get the error messages.
             \return The error messages that have been generated after creating the instance or clearing the previous error messages.
         */
-        const std::string &get_error_message() const;
+        const std::vector<std::string> &get_error_message() const;
 
         /** Clear the previous error messages. */
         void clear_error_message();
@@ -355,7 +356,7 @@ namespace tphrase {
             \param [inout] it InputIterator of the source text of a phrase syntax.
             \note The instance doesn't use 'it' and something referred by 'it' after returning from the constructor.
             \note Some parse errors may be detected if src has errors.
-            \note get_error_message() will return an empty string if no errors are detected.
+            \note get_error_message() will return an empty vector if no errors are detected.
         */
         Syntax(InputIteratorBase &it);
         /** Add the assignments from a phrase syntax.
@@ -380,7 +381,7 @@ namespace tphrase {
         /** The function used by Generator.
             \return The error messages that have been generated after creating the instance or clearing the previous error messages.
         */
-        std::string &&move_error_message() &&;
+        std::vector<std::string> &&move_error_message() &&;
 
     private:
         struct Impl;

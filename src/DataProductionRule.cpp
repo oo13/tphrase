@@ -76,7 +76,7 @@ namespace tphrase {
     bool
     DataProductionRule::bind_syntax(DataSyntax &syntax,
                                     int epoch,
-                                    std::string &err_msg)
+                                    std::vector<std::string> &err_msg)
     {
         if (binding_epoch < 0) {
             // Recursion

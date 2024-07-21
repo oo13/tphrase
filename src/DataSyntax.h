@@ -27,6 +27,7 @@
 #include <cstddef>
 #include <unordered_map>
 #include <string>
+#include <vector>
 
 #include "tphrase/common/ext_context.h"
 #include "DataProductionRule.h"
@@ -105,6 +106,7 @@ namespace tphrase {
             \return true if no errors are detected.
             \note It has a side effect to make the instance the unbound state (although the object that was bound on this remains bound on it).
             \note If this already contains nonterminal, then: (1) nonterminal and rule do NOT add to this, (2) an error message is added to err_msg, (3) false is returned.
+            \note A single error may occur at most.
         */
         bool add(std::string &&nonterminal, DataProductionRule &&rule, std::string &err_msg);
         /** Add a set of the assignments.
@@ -113,7 +115,7 @@ namespace tphrase {
             \note It has a side effect to make the instance the unbound state (although the object that was bound on this remains bound on it).
             \note If syntax has the nonterminal that this already contains, then: (1) the nonterminal in syntax overwrites it, (2) an error message is added to err_msg.
         */
-        void add(DataSyntax &&syntax, std::string &err_msg);
+        void add(DataSyntax &&syntax, std::vector<std::string> &err_msg);
 
         /** Try to bind the expansions on the nonterminals in this.
             \param [in] start_condition The nonterminal where is the start condition.
@@ -123,13 +125,13 @@ namespace tphrase {
             \note An error is caused if the recursive reference to a nonterminal exists.
             \note An error is cause if the nonterminal start_condition doesn't exist.
         */
-        bool bind_syntax(const std::string &start_condition, std::string &err_msg);
+        bool bind_syntax(const std::string &start_condition, std::vector<std::string> &err_msg);
 
         /** Fix the reference to the local nonterminal.
             \param [inout] err_msg The error messages are added if some errors are detected.
             \note An error is caused if the local nonterminal that is referred by a production rule doesn't exists.
         */
-        void fix_local_nonterminal(std::string &err_msg);
+        void fix_local_nonterminal(std::vector<std::string> &err_msg);
 
         /** Clear the instance. */
         void clear();

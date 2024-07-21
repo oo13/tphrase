@@ -89,8 +89,10 @@ std::size_t test_class_Generator()
         tphrase::Generator ph{syntax};
         auto r = ph.generate();
         return r == "nil"
-            && syntax.get_error_message().find("A text is expected.") != std::string::npos
-            && ph.get_error_message().find("A text is expected.") != std::string::npos;
+            && syntax.get_error_message().size() == 1
+            && syntax.get_error_message()[0].find("A text is expected.") != std::string::npos
+            && ph.get_error_message().size() == 1
+            && ph.get_error_message()[0].find("A text is expected.") != std::string::npos;
     });
 
     ut.set_test("Constructor with Syntax (move)", [&]() {
@@ -104,7 +106,8 @@ std::size_t test_class_Generator()
         tphrase::Generator ph{std::move(syntax)};
         auto r = ph.generate();
         return r == "nil"
-            && ph.get_error_message().find("A text is expected.") != std::string::npos;
+            && ph.get_error_message().size() == 1
+            && ph.get_error_message()[0].find("A text is expected.") != std::string::npos;
     });
 
     ut.set_test("Constructor with Syntax (copy) and start condition", [&]() {
@@ -118,8 +121,10 @@ std::size_t test_class_Generator()
         tphrase::Generator ph{syntax, "main2"};
         auto r = ph.generate();
         return r == "nil"
-            && syntax.get_error_message().find("A text is expected.") != std::string::npos
-            && ph.get_error_message().find("A text is expected.") != std::string::npos;
+            && syntax.get_error_message().size() == 1
+            && syntax.get_error_message()[0].find("A text is expected.") != std::string::npos
+            && ph.get_error_message().size() == 1
+            && ph.get_error_message()[0].find("A text is expected.") != std::string::npos;
     });
 
     ut.set_test("Constructor with Syntax (move) and start condition", [&]() {
@@ -133,7 +138,8 @@ std::size_t test_class_Generator()
         tphrase::Generator ph{std::move(syntax), "main3"};
         auto r = ph.generate();
         return r == "nil"
-            && ph.get_error_message().find("A text is expected.") != std::string::npos;
+            && ph.get_error_message().size() == 1
+            && ph.get_error_message()[0].find("A text is expected.") != std::string::npos;
     });
 
     ut.set_test("Constructor via R-Value Syntax (a pair of input iterators)#1", [&]() {
@@ -148,7 +154,8 @@ std::size_t test_class_Generator()
                                std::istreambuf_iterator<char>{}}};
         auto r = ph.generate();
         return r == "nil"
-            && ph.get_error_message().find("The non-empty pattern is expected.") != std::string::npos;
+            && ph.get_error_message().size() == 1
+            && ph.get_error_message()[0].find("The non-empty pattern is expected.") != std::string::npos;
     });
 
     ut.set_test("Constructor via R-Value Syntax (a pair of input iterators)#2", [&]() {
@@ -164,7 +171,8 @@ std::size_t test_class_Generator()
                                std::istream_iterator<char>{}}};
         auto r = ph.generate();
         return r == "nil"
-            && ph.get_error_message().find("The non-empty pattern is expected.") != std::string::npos;
+            && ph.get_error_message().size() == 1
+            && ph.get_error_message()[0].find("The non-empty pattern is expected.") != std::string::npos;
     });
 
     ut.set_test("Constructor via R-Value Syntax (a std::string)", [&]() {
@@ -178,7 +186,8 @@ std::size_t test_class_Generator()
         tphrase::Generator ph{s};
         auto r = ph.generate();
         return r == "nil"
-            && ph.get_error_message().find("The non-empty pattern is expected.") != std::string::npos;
+            && ph.get_error_message().size() == 1
+            && ph.get_error_message()[0].find("The non-empty pattern is expected.") != std::string::npos;
     });
 
     ut.set_test("Constructor via R-Value Syntax (a const char*)", [&]() {
@@ -191,7 +200,8 @@ std::size_t test_class_Generator()
         )"};
         auto r = ph.generate();
         return r == "nil"
-            && ph.get_error_message().find("The non-empty pattern is expected.") != std::string::npos;
+            && ph.get_error_message().size() == 1
+            && ph.get_error_message()[0].find("The non-empty pattern is expected.") != std::string::npos;
     });
 
     ut.set_test("Copy Constructor#1", [&]() {
@@ -268,10 +278,12 @@ std::size_t test_class_Generator()
             C = C1 | C2 | C3 |
         )");
         tphrase::Generator ph2{ph1};
-        return ph1.get_error_message().find("The non-empty pattern is expected.") != std::string::npos
-            && ph1.get_error_message().find("A text is expected.") != std::string::npos
-            && ph2.get_error_message().find("The non-empty pattern is expected.") != std::string::npos
-            && ph2.get_error_message().find("A text is expected.") != std::string::npos;
+        return ph1.get_error_message().size() == 2
+            && ph1.get_error_message()[0].find("The non-empty pattern is expected.") != std::string::npos
+            && ph1.get_error_message()[1].find("A text is expected.") != std::string::npos
+            && ph2.get_error_message().size() == 2
+            && ph2.get_error_message()[0].find("The non-empty pattern is expected.") != std::string::npos
+            && ph2.get_error_message()[1].find("A text is expected.") != std::string::npos;
     });
 
     ut.set_test("Copy Constructor (ID is not changed)", [&]() {
@@ -363,8 +375,9 @@ std::size_t test_class_Generator()
             C = C1 | C2 | C3 |
         )");
         tphrase::Generator ph2{std::move(ph1)};
-        return ph2.get_error_message().find("The non-empty pattern is expected.") != std::string::npos
-            && ph2.get_error_message().find("A text is expected.") != std::string::npos;
+        return ph2.get_error_message().size() == 2
+            && ph2.get_error_message()[0].find("The non-empty pattern is expected.") != std::string::npos
+            && ph2.get_error_message()[1].find("A text is expected.") != std::string::npos;
     });
 
     ut.set_test("Move Constructor (ID is not changed)", [&]() {
@@ -473,10 +486,12 @@ std::size_t test_class_Generator()
         )");
         tphrase::Generator ph2;
         ph2 = ph1;
-        return ph1.get_error_message().find("The non-empty pattern is expected.") != std::string::npos
-            && ph1.get_error_message().find("A text is expected.") != std::string::npos
-            && ph2.get_error_message().find("The non-empty pattern is expected.") != std::string::npos
-            && ph2.get_error_message().find("A text is expected.") != std::string::npos
+        return ph1.get_error_message().size() == 2
+            && ph1.get_error_message()[0].find("The non-empty pattern is expected.") != std::string::npos
+            && ph1.get_error_message()[1].find("A text is expected.") != std::string::npos
+            && ph2.get_error_message().size() == 2
+            && ph2.get_error_message()[0].find("The non-empty pattern is expected.") != std::string::npos
+            && ph2.get_error_message()[1].find("A text is expected.") != std::string::npos
             && !add_result;
     });
 
@@ -573,8 +588,9 @@ std::size_t test_class_Generator()
         )");
         tphrase::Generator ph2;
         ph2 = std::move(ph1);
-        return ph2.get_error_message().find("The non-empty pattern is expected.") != std::string::npos
-            && ph2.get_error_message().find("A text is expected.") != std::string::npos
+        return ph2.get_error_message().size() == 2
+            && ph2.get_error_message()[0].find("The non-empty pattern is expected.") != std::string::npos
+            && ph2.get_error_message()[1].find("A text is expected.") != std::string::npos
             && !add_result;
     });
 
@@ -665,8 +681,10 @@ std::size_t test_class_Generator()
         const bool add_result = ph.add(syntax);
         auto r = ph.generate();
         return r == "X"
-            && syntax.get_error_message().find("A text is expected.") != std::string::npos
-            && ph.get_error_message().find("A text is expected.") != std::string::npos
+            && syntax.get_error_message().size() == 1
+            && syntax.get_error_message()[0].find("A text is expected.") != std::string::npos
+            && ph.get_error_message().size() == 1
+            && ph.get_error_message()[0].find("A text is expected.") != std::string::npos
             && ph.get_number_of_syntax() == 1
             && ph.get_weight() == 9
             && ph.get_combination_number() == 9
@@ -687,13 +705,14 @@ std::size_t test_class_Generator()
             C = C4
         )");
         const auto id1 = ph.add(syntax);
-        const auto err_msg = ph.get_error_message();
+        const auto err_msg{ph.get_error_message()};
         syntax.clear_error_message();
         const auto id2 = ph.add(syntax);
         const auto id3 = ph.add(syntax);
         return !id1 && id2 && id3
             && id2 != id3
-            && err_msg == "The nonterminal \"C\" is already defined.\n"
+            && err_msg.size() == 1
+            && err_msg[0] == "The nonterminal \"C\" is already defined."
             && PhraseNumber_t{ph} == PhraseNumber_t{3, 15, 15};
     });
 
@@ -730,7 +749,8 @@ std::size_t test_class_Generator()
         const bool add_result = ph.add(std::move(syntax));
         auto r = ph.generate();
         return r == "X"
-            && ph.get_error_message().find("A text is expected.") != std::string::npos
+            && ph.get_error_message().size() == 1
+            && ph.get_error_message()[0].find("A text is expected.") != std::string::npos
             && ph.get_number_of_syntax() == 1
             && ph.get_weight() == 9
             && ph.get_combination_number() == 9
@@ -752,7 +772,7 @@ std::size_t test_class_Generator()
         )");
         tphrase::Syntax tmp1{syntax};
         const auto id1 = ph.add(std::move(tmp1));
-        const auto err_msg = ph.get_error_message();
+        const auto err_msg{ph.get_error_message()};
         syntax.clear_error_message();
         tphrase::Syntax tmp2{syntax};
         const auto id2 = ph.add(std::move(tmp2));
@@ -760,7 +780,8 @@ std::size_t test_class_Generator()
         const auto id3 = ph.add(std::move(tmp3));
         return !id1 && id2 && id3
             && id2 != id3
-            && err_msg == "The nonterminal \"C\" is already defined.\n"
+            && err_msg.size() == 1
+            && err_msg[0] == "The nonterminal \"C\" is already defined."
             && PhraseNumber_t{ph} == PhraseNumber_t{3, 15, 15};
     });
 
@@ -797,8 +818,10 @@ std::size_t test_class_Generator()
         const bool add_result = ph.add(syntax, "main2");
         auto r = ph.generate();
         return r == "X"
-            && syntax.get_error_message().find("A text is expected.") != std::string::npos
-            && ph.get_error_message().find("A text is expected.") != std::string::npos
+            && syntax.get_error_message().size() == 1
+            && syntax.get_error_message()[0].find("A text is expected.") != std::string::npos
+            && ph.get_error_message().size() == 1
+            && ph.get_error_message()[0].find("A text is expected.") != std::string::npos
             && ph.get_number_of_syntax() == 1
             && ph.get_weight() == 9
             && ph.get_combination_number() == 9
@@ -819,13 +842,14 @@ std::size_t test_class_Generator()
             C = C4
         )");
         const auto id1 = ph.add(syntax, "main2");
-        const auto err_msg = ph.get_error_message();
+        const auto err_msg{ph.get_error_message()};
         syntax.clear_error_message();
         const auto id2 = ph.add(syntax, "main2");
         const auto id3 = ph.add(syntax, "main2");
         return !id1 && id2 && id3
             && id2 != id3
-            && err_msg == "The nonterminal \"C\" is already defined.\n"
+            && err_msg.size() == 1
+            && err_msg[0] == "The nonterminal \"C\" is already defined."
             && PhraseNumber_t{ph} == PhraseNumber_t{3, 15, 15};
     });
 
@@ -862,7 +886,8 @@ std::size_t test_class_Generator()
         const bool add_result = ph.add(std::move(syntax), "main2");
         auto r = ph.generate();
         return r == "X"
-            && ph.get_error_message().find("A text is expected.") != std::string::npos
+            && ph.get_error_message().size() == 1
+            && ph.get_error_message()[0].find("A text is expected.") != std::string::npos
             && ph.get_number_of_syntax() == 1
             && ph.get_weight() == 9
             && ph.get_combination_number() == 9
@@ -884,7 +909,7 @@ std::size_t test_class_Generator()
         )");
         tphrase::Syntax tmp1{syntax};
         const auto id1 = ph.add(std::move(tmp1), "main2");
-        const auto err_msg = ph.get_error_message();
+        const auto err_msg{ph.get_error_message()};
         syntax.clear_error_message();
         tphrase::Syntax tmp2{syntax};
         const auto id2 = ph.add(std::move(tmp2), "main2");
@@ -892,7 +917,8 @@ std::size_t test_class_Generator()
         const auto id3 = ph.add(std::move(tmp3), "main2");
         return !id1 && id2 && id3
             && id2 != id3
-            && err_msg == "The nonterminal \"C\" is already defined.\n"
+            && err_msg.size() == 1
+            && err_msg[0] == "The nonterminal \"C\" is already defined."
             && PhraseNumber_t{ph} == PhraseNumber_t{3, 15, 15};
     });
 
@@ -1114,11 +1140,12 @@ std::size_t test_class_Generator()
             A = A1 | A2 | A3
             B = B1 | B2 | B3
         )"};
-        std::string err_msg{ph.get_error_message()};
+        std::vector<std::string> err_msg{ph.get_error_message()};
         ph.clear_error_message();
         auto r = ph.generate();
         return r == "nil"
-            && err_msg.find("A text is expected.") != std::string::npos
+            && err_msg.size() == 1
+            && err_msg[0].find("A text is expected.") != std::string::npos
             && ph.get_error_message().empty()
             && ph.get_number_of_syntax() == 0
             && ph.get_weight() == 0
@@ -1132,7 +1159,7 @@ std::size_t test_class_Generator()
 
             B = B1 | B2 | B3
         )"};
-        std::string err_msg{ph.get_error_message()};
+        std::vector<std::string> err_msg{ph.get_error_message()};
         ph.clear();
         ph.add(R"(
             main = {= V | W } | {C}
@@ -1140,7 +1167,8 @@ std::size_t test_class_Generator()
         )");
         auto r = ph.generate();
         return r == "V"
-            && err_msg.find("A text is expected.") != std::string::npos
+            && err_msg.size() == 1
+            && err_msg[0].find("A text is expected.") != std::string::npos
             && ph.get_error_message().empty()
             && ph.get_number_of_syntax() == 1
             && ph.get_weight() == 5

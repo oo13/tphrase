@@ -43,14 +43,15 @@ std::size_t test_class_Syntax()
 
     ut.set_test("Default Constructor", [&]() {
         tphrase::Syntax syntax;
-        return syntax.get_error_message() == "";
+        return syntax.get_error_message().empty();
     });
 
     ut.set_test("Constructor with a pair of input iterators#1", [&]() {
         std::istringstream s{"main = a |"};
         tphrase::Syntax syntax{std::istreambuf_iterator<char>{s},
                                std::istreambuf_iterator<char>{}};
-        return syntax.get_error_message().find("A text is expected.") != std::string::npos;
+        return syntax.get_error_message().size() == 1
+            && syntax.get_error_message()[0].find("A text is expected.") != std::string::npos;
     });
 
     ut.set_test("Constructor with a pair of input iterators#2", [&]() {
@@ -58,17 +59,20 @@ std::size_t test_class_Syntax()
         s.unsetf(std::ios_base::skipws);
         tphrase::Syntax syntax{std::istream_iterator<char>{s},
                                std::istream_iterator<char>{}};
-        return syntax.get_error_message().find("A text is expected.") != std::string::npos;
+        return syntax.get_error_message().size() == 1
+            && syntax.get_error_message()[0].find("A text is expected.") != std::string::npos;
     });
 
     ut.set_test("Constructor with a std::string", [&]() {
         tphrase::Syntax syntax{std::string{"main = a | b ~"}};
-        return syntax.get_error_message().find("Unexpected EOT.") != std::string::npos;
+        return syntax.get_error_message().size() == 1
+            && syntax.get_error_message()[0].find("Unexpected EOT.") != std::string::npos;
     });
 
     ut.set_test("Constructor with a const char *", [&]() {
         tphrase::Syntax syntax{"main = a | b ~///"};
-        return syntax.get_error_message().find("The non-empty pattern is expected.") != std::string::npos;
+        return syntax.get_error_message().size() == 1
+            && syntax.get_error_message()[0].find("The non-empty pattern is expected.") != std::string::npos;
     });
 
     ut.set_test("Copy Constructor", [&]() {
@@ -78,8 +82,10 @@ std::size_t test_class_Syntax()
             C = C1 | C2 | C3
         )"};
         tphrase::Syntax syntax2{syntax1};
-        return syntax1.get_error_message().find("The non-empty pattern is expected.") != std::string::npos
-            && syntax2.get_error_message().find("The non-empty pattern is expected.") != std::string::npos;
+        return syntax1.get_error_message().size() == 1
+            && syntax1.get_error_message()[0].find("The non-empty pattern is expected.") != std::string::npos
+            && syntax2.get_error_message().size() == 1
+            && syntax2.get_error_message()[0].find("The non-empty pattern is expected.") != std::string::npos;
     });
 
     ut.set_test("Move Constructor", [&]() {
@@ -88,7 +94,8 @@ std::size_t test_class_Syntax()
             B = B1 | B2 | B3
             C = C1 | C2 | C3
         )"}};
-        return syntax.get_error_message().find("The non-empty pattern is expected.") != std::string::npos;
+        return syntax.get_error_message().size() == 1
+            && syntax.get_error_message()[0].find("The non-empty pattern is expected.") != std::string::npos;
     });
 
     ut.set_test("Copy Assignment", [&]() {
@@ -105,8 +112,10 @@ std::size_t test_class_Syntax()
             Z = Z1 | Z2 | Z3
         )"};
         syntax2 = syntax1;
-        return syntax1.get_error_message().find("A text is expected.") != std::string::npos
-            && syntax2.get_error_message().find("A text is expected.") != std::string::npos;
+        return syntax1.get_error_message().size() == 1
+            && syntax1.get_error_message()[0].find("A text is expected.") != std::string::npos
+            && syntax2.get_error_message().size() == 1
+            && syntax2.get_error_message()[0].find("A text is expected.") != std::string::npos;
     });
 
     ut.set_test("Move Assignment", [&]() {
@@ -123,7 +132,8 @@ std::size_t test_class_Syntax()
             Z = Z1 | Z2 | Z3
         )"};
         syntax2 = std::move(syntax1);
-        return syntax2.get_error_message().find("A text is expected.") != std::string::npos;
+        return syntax2.get_error_message().size() == 1
+            && syntax2.get_error_message()[0].find("A text is expected.") != std::string::npos;
     });
 
     ut.set_test("Add Syntax (copy) without error", [&]() {
@@ -144,7 +154,8 @@ std::size_t test_class_Syntax()
         syntax1.clear_error_message();
         tphrase::Generator ph{syntax1};
         auto r = ph.generate();
-        return err_msg.find("A text is expected.") != std::string::npos
+        return err_msg.size() == 1
+            && err_msg[0].find("A text is expected.") != std::string::npos
             && good
             && r == "X";
     });
@@ -163,8 +174,9 @@ std::size_t test_class_Syntax()
             Z = Z1 | Z2 | Z3
         )"};
         const bool good = syntax1.add(syntax2);
-        return syntax1.get_error_message().find("A text is expected.") != std::string::npos
-            && syntax1.get_error_message().find("The non-empty pattern is expected.") != std::string::npos
+        return syntax1.get_error_message().size() == 2
+            && syntax1.get_error_message()[0].find("A text is expected.") != std::string::npos
+            && syntax1.get_error_message()[1].find("The non-empty pattern is expected.") != std::string::npos
             && !good;
     });
 
@@ -185,8 +197,10 @@ std::size_t test_class_Syntax()
         tphrase::Generator ph{syntax1};
         auto r = ph.generate();
         return r == "nil"
-            && syntax1.get_error_message() == "The nonterminal \"main\" is already defined.\n"
-            && ph.get_error_message() == "The nonterminal \"main\" is already defined.\n"
+            && syntax1.get_error_message().size() == 1
+            && syntax1.get_error_message()[0] == "The nonterminal \"main\" is already defined."
+            && ph.get_error_message().size() == 1
+            && ph.get_error_message()[0] == "The nonterminal \"main\" is already defined."
             && good;
     });
 
@@ -208,7 +222,8 @@ std::size_t test_class_Syntax()
         syntax1.clear_error_message();
         tphrase::Generator ph{syntax1};
         auto r = ph.generate();
-        return err_msg.find("A text is expected.") != std::string::npos
+        return err_msg.size() == 1
+            && err_msg[0].find("A text is expected.") != std::string::npos
             && good
             && r == "X";
     });
@@ -227,8 +242,9 @@ std::size_t test_class_Syntax()
             Z = Z1 | Z2 | Z3
         )"};
         const bool good = syntax1.add(std::move(syntax2));
-        return syntax1.get_error_message().find("A text is expected.") != std::string::npos
-            && syntax1.get_error_message().find("The non-empty pattern is expected.") != std::string::npos
+        return syntax1.get_error_message().size() == 2
+            && syntax1.get_error_message()[0].find("A text is expected.") != std::string::npos
+            && syntax1.get_error_message()[1].find("The non-empty pattern is expected.") != std::string::npos
             && !good;
     });
 
@@ -249,8 +265,10 @@ std::size_t test_class_Syntax()
         tphrase::Generator ph{syntax1};
         auto r = ph.generate();
         return r == "nil"
-            && syntax1.get_error_message() == "The nonterminal \"main\" is already defined.\n"
-            && ph.get_error_message() == "The nonterminal \"main\" is already defined.\n"
+            && syntax1.get_error_message().size() == 1
+            && syntax1.get_error_message()[0] == "The nonterminal \"main\" is already defined."
+            && ph.get_error_message().size() == 1
+            && ph.get_error_message()[0] == "The nonterminal \"main\" is already defined."
             && good;
     });
 
@@ -269,8 +287,9 @@ std::size_t test_class_Syntax()
         )"};
         const bool good = syntax.add(std::istreambuf_iterator<char>{s},
                                      std::istreambuf_iterator<char>{});
-        return syntax.get_error_message().find("A text is expected.") != std::string::npos
-            && syntax.get_error_message().find("The non-empty pattern is expected.") != std::string::npos
+        return syntax.get_error_message().size() == 2
+            && syntax.get_error_message()[0].find("A text is expected.") != std::string::npos
+            && syntax.get_error_message()[1].find("The non-empty pattern is expected.") != std::string::npos
             && !good;
     });
 
@@ -290,8 +309,9 @@ std::size_t test_class_Syntax()
         s.unsetf(std::ios_base::skipws);
         const bool good = syntax.add(std::istream_iterator<char>{s},
                                      std::istream_iterator<char>{});
-        return syntax.get_error_message().find("A text is expected.") != std::string::npos
-            && syntax.get_error_message().find("The non-empty pattern is expected.") != std::string::npos
+        return syntax.get_error_message().size() == 2
+            && syntax.get_error_message()[0].find("A text is expected.") != std::string::npos
+            && syntax.get_error_message()[1].find("The non-empty pattern is expected.") != std::string::npos
             && !good;
     });
 
@@ -313,8 +333,10 @@ std::size_t test_class_Syntax()
         tphrase::Generator ph{syntax};
         auto r = ph.generate();
         return r == "nil"
-            && syntax.get_error_message() == "The nonterminal \"main\" is already defined.\n"
-            && ph.get_error_message() == "The nonterminal \"main\" is already defined.\n"
+            && syntax.get_error_message().size() == 1
+            && syntax.get_error_message()[0] == "The nonterminal \"main\" is already defined."
+            && ph.get_error_message().size() == 1
+            && ph.get_error_message()[0] == "The nonterminal \"main\" is already defined."
             && good;
     });
 
@@ -337,8 +359,10 @@ std::size_t test_class_Syntax()
         tphrase::Generator ph{syntax};
         auto r = ph.generate();
         return r == "nil"
-            && syntax.get_error_message() == "The nonterminal \"main\" is already defined.\n"
-            && ph.get_error_message() == "The nonterminal \"main\" is already defined.\n"
+            && syntax.get_error_message().size() == 1
+            && syntax.get_error_message()[0] == "The nonterminal \"main\" is already defined."
+            && ph.get_error_message().size() == 1
+            && ph.get_error_message()[0] == "The nonterminal \"main\" is already defined."
             && good;
     });
 
@@ -356,8 +380,9 @@ std::size_t test_class_Syntax()
             Z = Z1 | Z2 | Z3
         )"};
         const bool good = syntax.add(s);
-        return syntax.get_error_message().find("A text is expected.") != std::string::npos
-            && syntax.get_error_message().find("The non-empty pattern is expected.") != std::string::npos
+        return syntax.get_error_message().size() == 2
+            && syntax.get_error_message()[0].find("A text is expected.") != std::string::npos
+            && syntax.get_error_message()[1].find("The non-empty pattern is expected.") != std::string::npos
             && !good;
     });
 
@@ -378,8 +403,10 @@ std::size_t test_class_Syntax()
         tphrase::Generator ph{syntax};
         auto r = ph.generate();
         return r == "nil"
-            && syntax.get_error_message() == "The nonterminal \"main\" is already defined.\n"
-            && ph.get_error_message() == "The nonterminal \"main\" is already defined.\n"
+            && syntax.get_error_message().size() == 1
+            && syntax.get_error_message()[0] == "The nonterminal \"main\" is already defined."
+            && ph.get_error_message().size() == 1
+            && ph.get_error_message()[0] == "The nonterminal \"main\" is already defined."
             && good;
     });
 
@@ -396,8 +423,9 @@ std::size_t test_class_Syntax()
             Y = Y1 | Y2 | Y3
             Z = Z1 | Z2 | Z3
         )");
-        return syntax.get_error_message().find("A text is expected.") != std::string::npos
-            && syntax.get_error_message().find("The non-empty pattern is expected.") != std::string::npos
+        return syntax.get_error_message().size() == 2
+            && syntax.get_error_message()[0].find("A text is expected.") != std::string::npos
+            && syntax.get_error_message()[1].find("The non-empty pattern is expected.") != std::string::npos
             && !good;
     });
 
@@ -417,8 +445,10 @@ std::size_t test_class_Syntax()
         tphrase::Generator ph{syntax};
         auto r = ph.generate();
         return r == "nil"
-            && syntax.get_error_message() == "The nonterminal \"main\" is already defined.\n"
-            && ph.get_error_message() == "The nonterminal \"main\" is already defined.\n"
+            && syntax.get_error_message().size() == 1
+            && syntax.get_error_message()[0] == "The nonterminal \"main\" is already defined."
+            && ph.get_error_message().size() == 1
+            && ph.get_error_message()[0] == "The nonterminal \"main\" is already defined."
             && good;
     });
 
@@ -429,7 +459,8 @@ std::size_t test_class_Syntax()
             B = B1 | B2 | B3
             C = C1 | C2 | C3
         )"};
-        const bool found = syntax.get_error_message().find("A text is expected.") != std::string::npos;
+        const bool found = syntax.get_error_message().size() == 1
+            && syntax.get_error_message()[0].find("A text is expected.") != std::string::npos;
         syntax.clear_error_message();
         const bool empty = syntax.get_error_message().empty();
         return found && empty;
@@ -442,13 +473,15 @@ std::size_t test_class_Syntax()
             B = B1 | B2 | B3
             C = C1 | C2 | C3
         )"};
-        const bool found = syntax.get_error_message().find("A text is expected.") != std::string::npos;
+        const bool found = syntax.get_error_message().size() == 1
+            && syntax.get_error_message()[0].find("A text is expected.") != std::string::npos;
         syntax.clear();
         tphrase::Generator ph{syntax};
         auto r = ph.generate();
         const bool empty = syntax.get_error_message().empty();
         return found && empty
-            && ph.get_error_message().find("The nonterminal \"main\" doesn't exist.\n") != std::string::npos;
+            && ph.get_error_message().size() == 1
+            && ph.get_error_message()[0].find("The nonterminal \"main\" doesn't exist.") != std::string::npos;
     });
 
     return ut.run();

@@ -78,7 +78,7 @@ namespace tphrase {
             \note The syntax ID is unique only in this.
             \note The syntax ID is not the same even if the equivalent phrase syntax is added again.
         */
-        SyntaxID_t add(const DataSyntax &syntax, const std::string &start_condition, std::string &err_msg);
+        SyntaxID_t add(const DataSyntax &syntax, const std::string &start_condition, std::vector<std::string> &err_msg);
         /** Add a phrase syntax.
             \param [inout] syntax The phrase syntax to be added. (moved)
             \param [in] start_condition The name of the nonterminal where is the start condition.
@@ -89,7 +89,7 @@ namespace tphrase {
             \note The syntax ID is unique only in this.
             \note The syntax ID is not the same even if the equivalent phrase syntax is added again.
         */
-        SyntaxID_t add(DataSyntax &&syntax, const std::string &start_condition, std::string &err_msg);
+        SyntaxID_t add(DataSyntax &&syntax, const std::string &start_condition, std::vector<std::string> &err_msg);
 
         /** Remove a phrase syntax.
             \param [in] id The ID for the phrase syntax.
