@@ -31,8 +31,6 @@
 #include <type_traits>
 #endif
 
-#include "tphrase/common/TempRefHolder.h"
-
 namespace tphrase {
     /** An abstraction class for an input iterator for char.
         \note The instance doesn't own something to be referred by the input iterator, so the users must keep the referred object alive until the instance is unused.
@@ -78,21 +76,17 @@ namespace tphrase {
     /** An abstraction layer class for an input iterator for char.
         \tparam T The type of an input iterator. The dereference of a value of T can be convertible to a value of char.
         \tparam S The type of the end for T.
-        \note The instance doesn't own something to be referred by the input iterator, so the users must keep the referred object alive while the instance is used.
-        \note The instance doesn't own the iterators if it's constructed by the L-value references.
+        \note The instance doesn't own the iterators and something to be referred by the input iterator, so the users must keep the referred object alive while the instance is used.
         \note It's assumed that the library users have no need to use an instance of this class directly.
     */
     template<typename T, typename S> REQUIRES_CharInputIteratorConcept(T, S)
     class InputIterator : public InputIteratorBase {
     public:
         /** The constructor.
-            \tparam T2 The type of an input iterator. The dereference of a value of T2 can be convertible to a value of char.
-            \tparam S2 The type of the end for T2.
-            \param [inout] p The iterator. (Universal reference; accessed by the reference or moved)
-            \param [inout] e The end iterator. (Universal reference; accessed by the reference or moved)
+            \param [inout] p The iterator.
+            \param [inout] e The end iterator.
         */
-        template<typename T2, typename S2> REQUIRES_CharInputIteratorConcept(T2, S2)
-        InputIterator(T2 &&p, S2 &&e);
+        InputIterator(T &p, S &e);
         InputIterator() = delete;
         InputIterator(const InputIterator &a) = delete;
         InputIterator<T, S> &operator=(const InputIterator &a) = delete;
@@ -102,14 +96,13 @@ namespace tphrase {
         virtual bool is_end() const;
 
     private:
-        TempRefHolder<typename std::remove_reference<T>::type> cur; /**< The current position */
-        TempRefHolder<typename std::remove_reference<S>::type> end; /**< The end position */
+        T &cur; /**< The current position */
+        S &end; /**< The end position */
     };
 
     template<typename T, typename S> REQUIRES_CharInputIteratorConcept(T, S)
-    template<typename T2, typename S2> REQUIRES_CharInputIteratorConcept(T2, S2)
-    InputIterator<T, S>::InputIterator(T2 &&p, S2 &&e)
-        : cur{std::forward<T2>(p)}, end{std::forward<S2>(e)}
+    InputIterator<T, S>::InputIterator(T &p, S &e)
+        : cur{p}, end{e}
     {
     }
 
@@ -121,20 +114,20 @@ namespace tphrase {
     template<typename T, typename S> REQUIRES_CharInputIteratorConcept(T, S)
     char InputIterator<T, S>::operator*()
     {
-        return **cur;
+        return *cur;
     }
 
     template<typename T, typename S> REQUIRES_CharInputIteratorConcept(T, S)
     InputIterator<T, S> &InputIterator<T, S>::operator++()
     {
-        ++*cur;
+        ++cur;
         return *this;
     }
 
     template<typename T, typename S> REQUIRES_CharInputIteratorConcept(T, S)
     bool InputIterator<T, S>::is_end() const
     {
-        return *cur == *end;
+        return cur == end;
     }
 }
 

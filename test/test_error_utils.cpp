@@ -65,10 +65,10 @@ std::size_t test_error_utils()
 
     ut.set_test("trunc_syntax InputIterator#1", [&]() {
         std::istringstream s{"main = \"0123456789\""};
+        auto b{std::istreambuf_iterator<char>{s}};
+        auto e{std::istreambuf_iterator<char>{}};
         tphrase::InputIterator<std::istreambuf_iterator<char>,
-                               std::istreambuf_iterator<char>>
-            it{std::istreambuf_iterator<char>{s},
-               std::istreambuf_iterator<char>{}};
+                               std::istreambuf_iterator<char>> it{b, e};
         auto r{tphrase::trunc_syntax(it)};
         return r == "main = \"0123456789\"";
     });
@@ -76,10 +76,10 @@ std::size_t test_error_utils()
     ut.set_test("trunc_syntax InputIterator#2", [&]() {
         std::istringstream s{"main = \"0123456789\""};
         s.unsetf(std::ios_base::skipws);
+        auto b{std::istream_iterator<char>{s}};
+        auto e{std::istream_iterator<char>{}};
         tphrase::InputIterator<std::istream_iterator<char>,
-                               std::istream_iterator<char>>
-            it{std::istream_iterator<char>{s},
-               std::istream_iterator<char>{}};
+                               std::istream_iterator<char>> it{b, e};
         auto r{tphrase::trunc_syntax(it)};
         return r == "main = \"0123456789\"";
     });
@@ -121,10 +121,10 @@ std::size_t test_error_utils()
         std::istringstream s{R"(
             main = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
         )"};
+        auto b{std::istreambuf_iterator<char>{s}};
+        auto e{std::istreambuf_iterator<char>{}};
         tphrase::InputIterator<std::istreambuf_iterator<char>,
-                               std::istreambuf_iterator<char>>
-            it{std::istreambuf_iterator<char>{s},
-               std::istreambuf_iterator<char>{}};
+                               std::istreambuf_iterator<char>> it{b, e};
         auto r{tphrase::trunc_syntax(it, 25)};
         return r == "main = 0 | 1 | 2 | 3 | 4...";
     });
@@ -134,10 +134,10 @@ std::size_t test_error_utils()
             main = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
         )"};
         s.unsetf(std::ios_base::skipws);
+        auto b{std::istream_iterator<char>{s}};
+        auto e{std::istream_iterator<char>{}};
         tphrase::InputIterator<std::istream_iterator<char>,
-                               std::istream_iterator<char>>
-            it{std::istream_iterator<char>{s},
-               std::istream_iterator<char>{}};
+                               std::istream_iterator<char>> it{b, e};
         auto r{tphrase::trunc_syntax(it, 25)};
         return r == "main = 0 | 1 | 2 | 3 | 4...";
     });

@@ -39,7 +39,6 @@ incfile = [
 ]
 incfile_common = [
     'include/tphrase/common/InputIterator.h',
-    'include/tphrase/common/TempRefHolder.h',
     'include/tphrase/common/ext_context.h',
     'include/tphrase/common/gsub_func.h',
     'include/tphrase/common/random_func.h',

@@ -26,7 +26,6 @@
 
 #include <cstddef>
 #include <string>
-#include <utility>
 
 #include "common/InputIterator.h"
 #include "common/ext_context.h"
@@ -392,7 +391,7 @@ namespace tphrase {
     template<typename T, typename S> REQUIRES_CharInputIteratorConcept(T, S)
     Syntax::Syntax(T &&begin, S &&end)
     {
-        InputIterator<T, S> it{std::forward<T>(begin), std::forward<S>(end)};
+        InputIterator<T, S> it{begin, end};
         Syntax a{it};
         pimpl = a.pimpl;
         a.pimpl = nullptr;
@@ -401,7 +400,7 @@ namespace tphrase {
     template<typename T, typename S> REQUIRES_CharInputIteratorConcept(T, S)
     bool Syntax::add(T &&begin, S &&end)
     {
-        InputIterator<T, S> it{std::forward<T>(begin), std::forward<S>(end)};
+        InputIterator<T, S> it{begin, end};
         return add(it);
     }
 }

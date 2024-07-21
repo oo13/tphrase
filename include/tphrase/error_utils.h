@@ -27,7 +27,6 @@
 #include <cstddef>
 #include <string>
 #include <type_traits>
-#include <utility>
 
 #include "common/InputIterator.h"
 
@@ -76,9 +75,8 @@ namespace tphrase {
     template<typename T, typename S> REQUIRES_CharInputIteratorConcept(T, S)
     auto trunc_syntax(T &&begin, S &&end, const std::size_t min_len = 40) -> decltype(begin == end, std::string{})
     {
-        InputIterator<T, S> it{std::forward<T>(begin), std::forward<S>(end)};
-        InputIteratorBase &base{it};
-        return trunc_syntax(base, min_len);
+        InputIterator<T, S> it{begin, end};
+        return trunc_syntax(it, min_len);
     }
 }
 

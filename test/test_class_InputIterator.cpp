@@ -97,6 +97,14 @@ namespace {
 
 std::size_t test_class_InputIterator()
 {
+    /* avoid to warn unused when concept is not available. */
+    TestInputIterator a;
+    TestInputIterator b{std::move(a)};
+    TestInputIterator c;
+    b = std::move(c);
+    b++;
+    (void)b;
+
     UnitTest ut("class InputIterator");
 
     ut.set_enter_function([&]() {
@@ -122,28 +130,6 @@ std::size_t test_class_InputIterator()
         }
         return good && destructor_count == 1;
     });
-
-    ut.set_test("Custom Input Iterator R-Value", [&]() {
-        bool good = true;
-        {
-            tphrase::InputIterator<TestInputIterator, char> it{TestInputIterator{}, static_cast<char>(2)};
-            good &= *it == 10;
-            good &= !it.is_end();
-            ++it;
-            good &= *it == 11;
-            good &= !it.is_end();
-            ++it;
-            good &= it.is_end();
-        }
-        return good && destructor_count == 2;
-    });
-
-    /* avoid to warn unused when concept is not available. */
-    TestInputIterator a;
-    TestInputIterator b;
-    b = std::move(a);
-    b++;
-    (void)b;
 
     ut.set_test("std::sstream Iterator L-Value#1", [&]() {
         std::istringstream s{"012"};
@@ -185,101 +171,11 @@ std::size_t test_class_InputIterator()
         return good;
     });
 
-    ut.set_test("std::sstream Iterator R-Value#1", [&]() {
-        std::istringstream s{"012"};
-        using it_t = std::istreambuf_iterator<char>;
-        tphrase::InputIterator<it_t, it_t> it{it_t{s}, it_t{}};
-        bool good = true;
-        good &= *it == '0';
-        good &= !it.is_end();
-        ++it;
-        good &= *it == '1';
-        good &= !it.is_end();
-        ++it;
-        good &= *it == '2';
-        good &= !it.is_end();
-        ++it;
-        good &= it.is_end();
-        return good;
-    });
-
-    ut.set_test("std::sstream Iterator R-Value#2", [&]() {
-        std::istringstream s{"012"};
-        using it_t = std::istream_iterator<char>;
-        tphrase::InputIterator<it_t, it_t> it{it_t{s}, it_t{}};
-        bool good = true;
-        good &= *it == '0';
-        good &= !it.is_end();
-        ++it;
-        good &= *it == '1';
-        good &= !it.is_end();
-        ++it;
-        good &= *it == '2';
-        good &= !it.is_end();
-        ++it;
-        good &= it.is_end();
-        return good;
-    });
-
-    ut.set_test("std::string Iterator L-Value", [&]() {
-        std::string s{"012"};
-        auto b{s.cbegin()};
-        auto e{s.cend()};
-        tphrase::InputIterator<decltype(b), decltype(e)> it{b, e};
-        bool good = true;
-        good &= *it == '0';
-        good &= !it.is_end();
-        ++it;
-        good &= *it == '1';
-        good &= !it.is_end();
-        ++it;
-        good &= *it == '2';
-        good &= !it.is_end();
-        ++it;
-        good &= it.is_end();
-        return good;
-    });
-
-    ut.set_test("std::string Iterator R-Value", [&]() {
-        std::string s{"012"};
-        using it_t = std::string::const_iterator;
-        tphrase::InputIterator<it_t, it_t> it{s.cbegin(), s.cend()};
-        bool good = true;
-        good &= *it == '0';
-        good &= !it.is_end();
-        ++it;
-        good &= *it == '1';
-        good &= !it.is_end();
-        ++it;
-        good &= *it == '2';
-        good &= !it.is_end();
-        ++it;
-        good &= it.is_end();
-        return good;
-    });
-
     ut.set_test("const char* L-Value", [&]() {
         const char *s{"012"};
         auto b{s};
         auto e{s + std::strlen(s)};
         tphrase::InputIterator<decltype(b), decltype(e)> it{b, e};
-        bool good = true;
-        good &= *it == '0';
-        good &= !it.is_end();
-        ++it;
-        good &= *it == '1';
-        good &= !it.is_end();
-        ++it;
-        good &= *it == '2';
-        good &= !it.is_end();
-        ++it;
-        good &= it.is_end();
-        return good;
-    });
-
-    ut.set_test("const char* R-Value", [&]() {
-        const char *s{"012"};
-        tphrase::InputIterator<const char*&, const char*&&> it{s, s + std::strlen(s)};
         bool good = true;
         good &= *it == '0';
         good &= !it.is_end();

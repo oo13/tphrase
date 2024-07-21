@@ -8,7 +8,6 @@ test_srcs = [
     'test_class_Generator.cpp',
     'test_class_InputIterator.cpp',
     'test_class_Syntax.cpp',
-    'test_class_TempRefHolder.cpp',
     'test_error_utils.cpp',
     'test_generate.cpp',
     'test_main.cpp',

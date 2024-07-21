@@ -23,7 +23,6 @@
 extern std::size_t test_class_Generator();
 extern std::size_t test_class_InputIterator();
 extern std::size_t test_class_Syntax();
-extern std::size_t test_class_TempRefHolder();
 extern std::size_t test_error_utils();
 extern std::size_t test_generate();
 extern std::size_t test_parse();
@@ -34,7 +33,6 @@ int main()
     r += test_class_Generator();
     r += test_class_InputIterator();
     r += test_class_Syntax();
-    r += test_class_TempRefHolder();
     r += test_error_utils();
     r += test_generate();
     r += test_parse();
