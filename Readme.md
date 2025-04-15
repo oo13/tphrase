@@ -4,6 +4,9 @@ This library is one of the translatable phrase generators. See [the manual](manu
 
 [Lua version is here.](https://github.com/oo13/translatable_phrase_generator)
 
+## Manual
+[The manual](manual.md)
+
 ## What's the translatable phrase generator
 
 1. The generator can generate a phrase (like a word, a name, a sentence, and a paragraph) with a syntax rule expressed by a text that can be replaced (=translated) in the run-time.
@@ -28,6 +31,7 @@ As far as I had experienced about translating the phrase node in my translatable
 - Don't care some white spaces for readability.
 
 ## Example of Phrase Syntax
+### Avoid combination explosion
 Japanese translation of Arach ship's name in Endless Sky (excerpt):
 ```
 ARACH_START= マg | グラb | ブロg | ブロp | ブラb | モg | モb {* | ... }
@@ -50,7 +54,7 @@ main = {ARACH_START}{ARACH_MIDDLE}{=
 ```
 Gsubs handle the characters that must be replaced by the combination with preceding and succeeding words.
 
-Inflection:
+### Inflection
 ```
 ARTICLES = a | the | that | its
 NOUNS = @apple | banana | @orange | @avocado | watermelon
@@ -59,6 +63,7 @@ main = {ARTICLES} {NOUNS} ~
        /@//
 ```
 
+### Translate a single word into some different words
 An example that an English word cannot translates into the same word in Japanese.
 English version:
 ```
@@ -77,18 +82,73 @@ main = あなたは{ECONOMICAL_SITUATION}です。 |
 ```
 If you use a simple substitution instead of a translatable phrase generator, it cannot translate. For example:
 ```
-   if (rand() > 0.5) {
-      word = _("poor");
-   } else {
-      word = _("rich");
-   }
-   if (rand() > 0.5) {
-      message = format(_("You are %s."), word);
-   } else {
-      message = format(_("You purchased a %s ship."), word);
-   }
+    if (std::rand() > 0.5) {
+        word = _("poor");
+    } else {
+        word = _("rich");
+    }
+    if (std::rand() > 0.5) {
+        message = std::format(std::runtime_format(_("You are {}.")), word);
+    } else {
+        message = std::format(std::runtime_format(_("You purchased a {} ship.")), word);
+    }
 ```
 The translator can create only two independent messages at most but Japanese translator need four independent messages.
+(std::format is a C++20 function, std::runtime_format is a C++26 function)
+
+### Alternative to printf
+This phrase generator can play a role of printf by "external context":
+```
+    if (money < 10000) {
+        s = _("poor");
+    } else {
+        s = _("rich");
+    }
+    tphrase::Generator ph1(_("main = You are {ECONOMICAL_SITUATION}."));
+    std::string r1{ph1.generate({{ "ECONOMICAL_SITUATION", s }})};
+    // ...snip...
+    if (cost < 10000) {
+        s = _("poor");
+    } else {
+        s = _("rich");
+    }
+    tphrase::Generator ph2(_("main = You purchased a {ECONOMICAL_SITUATION} ship."));
+    std::string r2{ph2.generate({{ "ECONOMICAL_SITUATION", s }})};
+```
+If you use a format function, it might not be translatable. For example, this is not a translatable in Japanese by gettext:
+```
+    if (money < 10000) {
+        s = _("poor");
+    } else {
+        s = _("rich");
+    }
+    std::string r1{std::format(std::runtime_format(_("You are {}.")), s)};
+    // ...snip...
+    if (cost < 10000) {
+        s = _("poor");
+    } else {
+        s = _("rich");
+    }
+    std::string r2{std::format(std::runtime_format(_("You purchased a {} ship.")), s)};
+```
+because gettext merges same words into a single entry, so "poor" can have a single translated word, but it should be translate into two different words. (so GNU gettext has pgettext() function.)
+
+In fact, this is the best way for the translation:
+```
+    if (money < 10000) {
+        r1 = _("You are poor.");
+    } else {
+        r1 = _("You are rich.");
+    }
+    // ...snip...
+    if (cost < 10000) {
+        r2 = _("You purchased a poor ship.");
+    } else {
+        r2 = _("You purchased a rich ship.");
+    }
+```
+but it's not practical if the combination increases.
+
 # To Build the Library
 Use meson.
 ```
