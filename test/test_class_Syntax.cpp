@@ -72,7 +72,7 @@ std::size_t test_class_Syntax()
     ut.set_test("Constructor with a const char *", [&]() {
         tphrase::Syntax syntax{"main = a | b ~///"};
         return syntax.get_error_message().size() == 1
-            && syntax.get_error_message()[0].find("The non-empty pattern is expected.") != std::string::npos;
+            && syntax.get_error_message()[0].find("A nonempty pattern is expected.") != std::string::npos;
     });
 
     ut.set_test("Copy Constructor", [&]() {
@@ -83,9 +83,9 @@ std::size_t test_class_Syntax()
         )"};
         tphrase::Syntax syntax2{syntax1};
         return syntax1.get_error_message().size() == 1
-            && syntax1.get_error_message()[0].find("The non-empty pattern is expected.") != std::string::npos
+            && syntax1.get_error_message()[0].find("A nonempty pattern is expected.") != std::string::npos
             && syntax2.get_error_message().size() == 1
-            && syntax2.get_error_message()[0].find("The non-empty pattern is expected.") != std::string::npos;
+            && syntax2.get_error_message()[0].find("A nonempty pattern is expected.") != std::string::npos;
     });
 
     ut.set_test("Move Constructor", [&]() {
@@ -95,7 +95,7 @@ std::size_t test_class_Syntax()
             C = C1 | C2 | C3
         )"}};
         return syntax.get_error_message().size() == 1
-            && syntax.get_error_message()[0].find("The non-empty pattern is expected.") != std::string::npos;
+            && syntax.get_error_message()[0].find("A nonempty pattern is expected.") != std::string::npos;
     });
 
     ut.set_test("Copy Assignment", [&]() {
@@ -176,7 +176,7 @@ std::size_t test_class_Syntax()
         const bool good = syntax1.add(syntax2);
         return syntax1.get_error_message().size() == 2
             && syntax1.get_error_message()[0].find("A text is expected.") != std::string::npos
-            && syntax1.get_error_message()[1].find("The non-empty pattern is expected.") != std::string::npos
+            && syntax1.get_error_message()[1].find("A nonempty pattern is expected.") != std::string::npos
             && !good;
     });
 
@@ -244,7 +244,7 @@ std::size_t test_class_Syntax()
         const bool good = syntax1.add(std::move(syntax2));
         return syntax1.get_error_message().size() == 2
             && syntax1.get_error_message()[0].find("A text is expected.") != std::string::npos
-            && syntax1.get_error_message()[1].find("The non-empty pattern is expected.") != std::string::npos
+            && syntax1.get_error_message()[1].find("A nonempty pattern is expected.") != std::string::npos
             && !good;
     });
 
@@ -289,7 +289,7 @@ std::size_t test_class_Syntax()
                                      std::istreambuf_iterator<char>{});
         return syntax.get_error_message().size() == 2
             && syntax.get_error_message()[0].find("A text is expected.") != std::string::npos
-            && syntax.get_error_message()[1].find("The non-empty pattern is expected.") != std::string::npos
+            && syntax.get_error_message()[1].find("A nonempty pattern is expected.") != std::string::npos
             && !good;
     });
 
@@ -311,7 +311,7 @@ std::size_t test_class_Syntax()
                                      std::istream_iterator<char>{});
         return syntax.get_error_message().size() == 2
             && syntax.get_error_message()[0].find("A text is expected.") != std::string::npos
-            && syntax.get_error_message()[1].find("The non-empty pattern is expected.") != std::string::npos
+            && syntax.get_error_message()[1].find("A nonempty pattern is expected.") != std::string::npos
             && !good;
     });
 
@@ -382,7 +382,7 @@ std::size_t test_class_Syntax()
         const bool good = syntax.add(s);
         return syntax.get_error_message().size() == 2
             && syntax.get_error_message()[0].find("A text is expected.") != std::string::npos
-            && syntax.get_error_message()[1].find("The non-empty pattern is expected.") != std::string::npos
+            && syntax.get_error_message()[1].find("A nonempty pattern is expected.") != std::string::npos
             && !good;
     });
 
@@ -425,7 +425,7 @@ std::size_t test_class_Syntax()
         )");
         return syntax.get_error_message().size() == 2
             && syntax.get_error_message()[0].find("A text is expected.") != std::string::npos
-            && syntax.get_error_message()[1].find("The non-empty pattern is expected.") != std::string::npos
+            && syntax.get_error_message()[1].find("A nonempty pattern is expected.") != std::string::npos
             && !good;
     });
 

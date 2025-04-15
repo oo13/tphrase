@@ -654,7 +654,7 @@ namespace {
             it.next();
         }
         if (!allow_empty && pat.empty()) {
-            throw_parse_error(it, "The non-empty pattern is expected.");
+            throw_parse_error(it, "A nonempty pattern is expected.");
         }
         if (it.is_end()) {
             throw_parse_error(it, "Unexpected EOT.");

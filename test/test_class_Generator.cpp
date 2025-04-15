@@ -155,7 +155,7 @@ std::size_t test_class_Generator()
         auto r = ph.generate();
         return r == "nil"
             && ph.get_error_message().size() == 1
-            && ph.get_error_message()[0].find("The non-empty pattern is expected.") != std::string::npos;
+            && ph.get_error_message()[0].find("A nonempty pattern is expected.") != std::string::npos;
     });
 
     ut.set_test("Constructor via R-Value Syntax (a pair of input iterators)#2", [&]() {
@@ -172,7 +172,7 @@ std::size_t test_class_Generator()
         auto r = ph.generate();
         return r == "nil"
             && ph.get_error_message().size() == 1
-            && ph.get_error_message()[0].find("The non-empty pattern is expected.") != std::string::npos;
+            && ph.get_error_message()[0].find("A nonempty pattern is expected.") != std::string::npos;
     });
 
     ut.set_test("Constructor via R-Value Syntax (a std::string)", [&]() {
@@ -187,7 +187,7 @@ std::size_t test_class_Generator()
         auto r = ph.generate();
         return r == "nil"
             && ph.get_error_message().size() == 1
-            && ph.get_error_message()[0].find("The non-empty pattern is expected.") != std::string::npos;
+            && ph.get_error_message()[0].find("A nonempty pattern is expected.") != std::string::npos;
     });
 
     ut.set_test("Constructor via R-Value Syntax (a const char*)", [&]() {
@@ -201,7 +201,7 @@ std::size_t test_class_Generator()
         auto r = ph.generate();
         return r == "nil"
             && ph.get_error_message().size() == 1
-            && ph.get_error_message()[0].find("The non-empty pattern is expected.") != std::string::npos;
+            && ph.get_error_message()[0].find("A nonempty pattern is expected.") != std::string::npos;
     });
 
     ut.set_test("Copy Constructor#1", [&]() {
@@ -279,10 +279,10 @@ std::size_t test_class_Generator()
         )");
         tphrase::Generator ph2{ph1};
         return ph1.get_error_message().size() == 2
-            && ph1.get_error_message()[0].find("The non-empty pattern is expected.") != std::string::npos
+            && ph1.get_error_message()[0].find("A nonempty pattern is expected.") != std::string::npos
             && ph1.get_error_message()[1].find("A text is expected.") != std::string::npos
             && ph2.get_error_message().size() == 2
-            && ph2.get_error_message()[0].find("The non-empty pattern is expected.") != std::string::npos
+            && ph2.get_error_message()[0].find("A nonempty pattern is expected.") != std::string::npos
             && ph2.get_error_message()[1].find("A text is expected.") != std::string::npos;
     });
 
@@ -376,7 +376,7 @@ std::size_t test_class_Generator()
         )");
         tphrase::Generator ph2{std::move(ph1)};
         return ph2.get_error_message().size() == 2
-            && ph2.get_error_message()[0].find("The non-empty pattern is expected.") != std::string::npos
+            && ph2.get_error_message()[0].find("A nonempty pattern is expected.") != std::string::npos
             && ph2.get_error_message()[1].find("A text is expected.") != std::string::npos;
     });
 
@@ -487,10 +487,10 @@ std::size_t test_class_Generator()
         tphrase::Generator ph2;
         ph2 = ph1;
         return ph1.get_error_message().size() == 2
-            && ph1.get_error_message()[0].find("The non-empty pattern is expected.") != std::string::npos
+            && ph1.get_error_message()[0].find("A nonempty pattern is expected.") != std::string::npos
             && ph1.get_error_message()[1].find("A text is expected.") != std::string::npos
             && ph2.get_error_message().size() == 2
-            && ph2.get_error_message()[0].find("The non-empty pattern is expected.") != std::string::npos
+            && ph2.get_error_message()[0].find("A nonempty pattern is expected.") != std::string::npos
             && ph2.get_error_message()[1].find("A text is expected.") != std::string::npos
             && !add_result;
     });
@@ -589,7 +589,7 @@ std::size_t test_class_Generator()
         tphrase::Generator ph2;
         ph2 = std::move(ph1);
         return ph2.get_error_message().size() == 2
-            && ph2.get_error_message()[0].find("The non-empty pattern is expected.") != std::string::npos
+            && ph2.get_error_message()[0].find("A nonempty pattern is expected.") != std::string::npos
             && ph2.get_error_message()[1].find("A text is expected.") != std::string::npos
             && !add_result;
     });
