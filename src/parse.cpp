@@ -70,7 +70,6 @@ namespace tphrase {
         DataSyntax syntax;
         CharFeeder it{p};
 
-        skip_space_nl(it);
         while (!it.is_end()) {
             try {
                 parse_assignment(it, syntax);
@@ -91,7 +90,6 @@ namespace tphrase {
                     }
                 }
             }
-            skip_space_nl(it);
         }
         syntax.fix_local_nonterminal(err_msg);
         return syntax;
@@ -190,10 +188,15 @@ namespace {
         \param [inout] syntax The syntax into which the assignment is added.
     */
     /*
+      start = space_nl_opt, [ { assignment, space_nl_opt } ], $ ;
       assignment = nonterminal, space_opt, [ weight, space_opt ], operator, space_one_nl_opt, production_rule, ( nl | $ ) ; (* One of spaces before weight is necessary because nonterminal consumes the numeric character and the period. *)
     */
     void parse_assignment(CharFeeder &it, DataSyntax &syntax)
     {
+        skip_space_nl(it);
+        if (it.is_end()) {
+            return;
+        }
         std::string nonterminal{parse_nonterminal(it)};
         skip_space(it);
         const double weight = parse_weight(it);

@@ -463,5 +463,30 @@ Hello World.)");
             && err_msg[0].find("The nonterminal \"A\" is already defined.") != std::string::npos;
     });
 
+    ut.set_test("unclosed comment 1", [&]() {
+        tphrase::Generator ph;
+        ph.add(R"(
+            {*
+        )");
+        const auto r = ph.generate();
+        const std::vector<std::string> err_msg{ph.get_error_message()};
+        return r == "nil"
+            && err_msg.size() == 1
+            && err_msg[0].find("The end of the comment is expected.") != std::string::npos;
+    });
+
+    ut.set_test("unclosed comment 2", [&]() {
+        tphrase::Generator ph;
+        ph.add(R"(
+            main = A
+            {*
+        )");
+        const auto r = ph.generate();
+        const std::vector<std::string> err_msg{ph.get_error_message()};
+        return r == "nil"
+            && err_msg.size() == 1
+            && err_msg[0].find("The end of the comment is expected.") != std::string::npos;
+    });
+
     return ut.run();
 }
