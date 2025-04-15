@@ -348,6 +348,10 @@ I tested on meson 1.4.1.
 TPhrase supports C++11 or later, and it's tested on C++11 and C++20. The source files uses only C++11, the public include files (under include/) uses concept if available.
 
 # License
+TPhrase is licensed under GPL-3.0-or-later or Apache-2.0. (I know Apache-2.0 is compatible with GPL 3.0, but with or later?)
+
+Copyright © 2024 OOTA, Masato
+
 This file is part of TPhrase.
 
 TPhrase is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
@@ -356,4 +360,10 @@ TPhrase is distributed in the hope that it will be useful, but WITHOUT ANY WARRA
 
 You should have received a copy of the GNU General Public License along with TPhrase.  If not, see <http://www.gnu.org/licenses/>.
 
-Copyright © 2024 OOTA, Masato
+OR
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use TPhrase except in compliance with the License. You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
