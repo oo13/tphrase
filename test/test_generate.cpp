@@ -385,6 +385,65 @@ std::size_t test_generate()
             && ph2.get_error_message().empty();
     });
 
+    ut.set_test("Sharing Anonymous Rule", [&]() {
+        tphrase::Syntax common(R"(
+            sub = {= {sub2}}
+        )");
+        tphrase::Syntax main1(R"(
+            main = {sub}
+            sub2 = 1
+        )");
+        tphrase::Syntax main2(R"(
+            main = {sub}
+            sub2 = 2
+        )");
+        main1.add(common);
+        main2.add(common);
+        tphrase::Generator ph1(main1);
+        tphrase::Generator ph2(main2);
+        return ph1.generate() == "1" && ph2.generate() == "2"
+            && common.get_error_message().empty()
+            && main1.get_error_message().empty()
+            && main2.get_error_message().empty()
+            && ph1.get_error_message().empty()
+            && ph2.get_error_message().empty();
+    });
+
+    ut.set_test("Sharing Anonymous Rule Distribution", [&]() {
+        tphrase::Syntax common(R"(
+            sub = {= {sub2}}
+        )");
+        tphrase::Syntax main1(R"(
+            main = {sub}
+            sub2 = 1 | 2 | 3 | 4
+        )");
+        tphrase::Syntax main2(R"(
+            main = {sub}
+            sub2 = A | B
+        )");
+        main1.add(common);
+        main2.add(common);
+        tphrase::Generator ph1(main1);
+        tphrase::Generator ph2(main2);
+        tphrase::Generator::set_random_function(get_default_random_func());
+        const bool good1 = check_distribution(ph1, 100000, {
+                { "1", 0.25 },
+                { "2", 0.25 },
+                { "3", 0.25 },
+                { "4", 0.25 },
+            }, 0.01);
+        const bool good2 = check_distribution(ph2, 100000, {
+                { "A", 0.5 },
+                { "B", 0.5 },
+            }, 0.01);
+        return good1 && good2
+            && common.get_error_message().empty()
+            && main1.get_error_message().empty()
+            && main2.get_error_message().empty()
+            && ph1.get_error_message().empty()
+            && ph2.get_error_message().empty();
+    });
+
     ut.set_test("Overwrite Nonterminal", [&]() {
         tphrase::Syntax sub(R"(
             sub = A
