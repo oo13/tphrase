@@ -2,7 +2,7 @@
 
 This library is one of the translatable phrase generators. See [the manual](manual.md) for details.
 
-[Lua version is here.](https://github.com/oo13/translatable_phrase_generator)
+There are [Lua](https://github.com/oo13/translatable_phrase_generator) and [Rust](https://github.com/oo13/tphrase-rs) versions.
 
 ## Manual
 [The manual](manual.md)
